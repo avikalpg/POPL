@@ -16,8 +16,12 @@ local Length Take Drop in
       end
    end
    % Testing the Drop Function
+/*   {Browse '1.2'}
    {Browse {Drop [1 3 5 7 9 11 13] 3}}
-
+   {Browse {Drop [1 3 5 7 9 11 13] 0}}
+   {Browse {Drop [1 3 5 7 9 11 13] ~3}}
+   {Browse {Drop [1 3 5 7 9 11 13] 10}}*/
+   
    % The definition of Take function uses the Drop function
    fun{Take Xs N}
       if N < 1 then nil
@@ -30,7 +34,11 @@ local Length Take Drop in
       end
    end
    % Testing the Take function
+/*   {Browse '1.1'}
    {Browse {Take [1 2 3 45 2345] 4}}
+   {Browse {Take [1 2 3 45 2345] 0}}
+   {Browse {Take [1 2 3 45 2345] ~3}}
+   {Browse {Take [1 2 3 45 2345] 7}}*/
 end
 
 local Merge in
@@ -46,5 +54,7 @@ local Merge in
       end
    end
    % Testing the Merge Function
+/*   {Browse '1.3'}
    {Browse {Merge [1 2 3 4] [~3 ~2 2 4 6]}}
+   {Browse {Merge [~3 ~2 2 4 6] [1 2 3 4]}}*/
 end

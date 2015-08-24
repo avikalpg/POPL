@@ -37,6 +37,7 @@ end
 % Test cases for 3.1
 %{Browse {Taylor2 0.5235}}
 
+% Ref: http://home.agh.edu.pl/~balis/dydakt/kimp/lab3/
 fun {Sum Xs A N}
    if N > 0 then
       case Xs of X|Xr then

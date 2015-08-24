@@ -35,7 +35,7 @@ fun lazy{Taylor2 X}
 end
 
 % Test cases for 3.1
-{Browse {Taylor2 0.5235}}
+%{Browse {Taylor2 0.5235}}
 
 fun {Sum Xs A N}
    if N > 0 then
@@ -54,8 +54,8 @@ fun {Taylor3 X N}
    end
 end
 % Testing 3.2.1
-{Browse {Taylor3 0.5235 10}}
-{Browse {Taylor3 0.5235 2}}
+/*{Browse {Taylor3 0.5235 10}}
+{Browse {Taylor3 0.5235 2}}*/
 
 fun {Find Xs F Epsilon}
    case Xs
@@ -73,7 +73,7 @@ fun {Taylor4 X Epsilon}
       {Find Xs 0. Epsilon}
    end
 end
-{Browse 'Testing for 3.2.2'}
+/*{Browse 'Testing for 3.2.2'}
 {Browse {Taylor4 0.5235 0.001}}
 {Browse {Taylor4 0.5235 0.1}}
-{Browse {Taylor4 0.5235 0.00001}}
+{Browse {Taylor4 0.5235 0.00001}}*/

@@ -185,5 +185,4 @@ end
 /*{Browse '3.3.2'}
 {Browse 1# {PossibleMoves [[o o s] [x o x] [x o s]] o}}
 {Browse 2# {PossibleMoves [[o o s] [x s x] [x o s]] o}}
-{Browse 3# {PossibleMoves [[s s s] [s s s] [s s s]] o}}
-*/
+{Browse 3# {PossibleMoves [[s s s] [s s s] [s s s]] o}}*/

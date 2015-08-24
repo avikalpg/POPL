@@ -1,4 +1,3 @@
-
 declare Factorial Power Taylor2 Taylor3 Find Sum
 
 fun {Factorial N}
@@ -34,6 +33,8 @@ fun lazy{Taylor2 X}
       {TaylorAux X 1 0}
    end
 end
+
+% Test cases for 3.1
 {Browse {Taylor2 0.5235}}
 
 fun {Sum Xs A N}
@@ -52,18 +53,16 @@ fun {Taylor3 X N}
       {Sum Xs 0. N}
    end
 end
+% Testing 3.2.1
+{Browse {Taylor3 0.5235 10}}
 {Browse {Taylor3 0.5235 2}}
 
 fun {Find Xs F Epsilon}
    case Xs
    of A|B|C then
       if {Abs A-B} > Epsilon then
-	 /*{Browse 'Testing code reachability 1'}
-	 {Browse  {Find B|C F+A Epsilon}}
-	 {Browse 'Testing code reachability 2'}*/
 	 {Find B|C F+A Epsilon}
-      else %{Browse F}
-	 F+A
+      else F+A
       end
    end
 end
@@ -71,8 +70,10 @@ end
 fun {Taylor4 X Epsilon}
    local Xs in
       Xs = {Taylor2 X}
-      {Browse test# Xs}
       {Find Xs 0. Epsilon}
    end
 end
-{Browse {Taylor4 0.5 0.01}}
+{Browse 'Testing for 3.2.2'}
+{Browse {Taylor4 0.5235 0.001}}
+{Browse {Taylor4 0.5235 0.1}}
+{Browse {Taylor4 0.5235 0.00001}}

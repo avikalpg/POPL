@@ -13,7 +13,8 @@ fun {PopAux L}
    end
 end
 
-L = {NewCell [1 2 3]}
+% Test code
+/*L = {NewCell [1 2 3]}
 {Browse @L}
 L := {Push @L 4}
 {Browse push#@L}
@@ -25,6 +26,6 @@ for I in 1..3 do
    {Browse popped# @X}
    {Browse rem# @L}
 end
-
+*/
 
 

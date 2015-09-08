@@ -60,6 +60,9 @@ end
 
 %{Interpret [[localvar ident(x) [bind ident(x) literal(avi)] [nop] ]]}
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)]]]]}
+%{Interpret [[localvar ident(z) [bind literal(100) ident(z)]]]}
+
+%{Interpret [[localvar ident(x) [localvar ident(x1) [localvar ident(x2) [bind ident(x) [record literal(a) [[literal(feature1) ident(x1)] [literal(feature2) ident(x2)]]]]]]]]}
 
 /* GUYS!! In this, the value does not spread into all places occupied by equivalence(2). Please rectify!! */
-%{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)] [bind ident(x) 5]] [nop] ] [localvar ident(a) [bind ident(a) 23]]]}
+%{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)] [bind ident(x) literal(5)]] [nop] ] [localvar ident(a) [bind ident(a) 23]]]}

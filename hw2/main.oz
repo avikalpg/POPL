@@ -1,5 +1,5 @@
 \insert 'SingleAssignmentStore.oz'
-\insert 'Unify.oz'
+%\insert 'Unify.oz'
 
 declare Interpret Execute
 
@@ -11,7 +11,8 @@ proc{Interpret Input}
 end
 
 proc{Execute SemStack}
-   {Browse @SemStack}
+   {Browse @SemStack#{Dictionary.entries SAS} }
+   %{Browse {Dictionary.entries SAS}}
    case @SemStack.stmt
    of nil then {Browse 'Execution completed successfully'}
    [] [nop]|Xs then

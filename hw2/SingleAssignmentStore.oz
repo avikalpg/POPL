@@ -1,5 +1,3 @@
-\insert 'Stack.oz'
-
 declare SAS BindValueToKeyInSAS AddKeyToSAS StoreCounter RetrieveFromSAS BindRefToKeyInSAS
 
 SAS = {Dictionary.new}
@@ -7,37 +5,22 @@ StoreCounter = {NewCell 0}
 
 fun{AddKeyToSAS}
    StoreCounter := @StoreCounter + 1 % Check if this works
-   local Value in
-      Value = {Dictionary.new}
-      {Dictionary.put Value value nil}
-      {Dictionary.put Value bound false}
-      {Dictionary.put Value equi [ @StoreCounter ]} % This should actually be a set, not List
-      {Dictionary.put SAS @StoreCounter Value}
-   end
+   {Dictionary.put SAS @StoreCounter equivalence(@StoreCounter)}
    @StoreCounter
 end
 
-/* Testing AddKeyToSAS
+/* Testing AddKeyToSAS 
 {Browse {AddKeyToSAS}}
 {Browse {AddKeyToSAS}}
 {Browse {AddKeyToSAS}}
 {Browse {Dictionary.entries SAS}}
-local X in
-   for X in {Dictionary.keys SAS} do
-      {Browse [ X {Dictionary.entries {Dictionary.get SAS X} } ] }
-   end
-end
 */
 
 fun{RetrieveFromSAS Key}
    local Val in
       Val = {Dictionary.condGet SAS Key ~1}
       if Val == ~1 then raise missingKeyException(Key) end
-      else if {Dictionary.get Val bound} == false then
-	      {Dictionary.get Val equi}
-	   else
-	      {Dictionary.get Val value}
-	   end
+      else Val
       end
    end
 end
@@ -47,13 +30,9 @@ end
 {Browse {RetrieveFromSAS 10}}*/
 
 proc{BindValueToKeySAS Key Val}
-   local Entry in
-      Entry = {Dictionary.get SAS Key}
-      if {Dictionary.get Entry bound} == false then
-	 {Dictionary.put Entry value Val}
-	 {Dictionary.put Entry bound true}
-      else raise alreadyAssigned(Key Val {Dictionary.get Entry value}) end
-      end
+   case SAS.Key
+   of equivalence(_) then {Dictionary.put SAS Key Val}
+   else raise alreadyAssigned(Key Val SAS.Key) end
    end
 end
 
@@ -65,13 +44,19 @@ end
 {Browse {RetrieveFromSAS 1}}
 */
 
-%% INCOMPLETE
 proc{BindRefToKeyInSAS Key RefKey}
    local Entry in
       Entry = {Dictionary.get SAS Key}
-      if {Dictionary.get Entry bound} == false then
-	 {Dictionary.put Entry bound true}
-%      else raise alreadyAssigned(Key Val {Dictionary.get Entry value}) end
+      case Entry
+      of equivalence(_) then {Dictionary.put SAS Key SAS.RefKey}
+      else raise alreadyAssignedException(Key SAS.RefKey Entry) end
       end
    end
 end
+
+/* Test cases 
+{Browse {AddKeyToSAS}}
+{Browse {AddKeyToSAS}}
+{BindRefToKeyInSAS 1 2}
+{Browse {Dictionary.entries SAS}}
+*/

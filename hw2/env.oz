@@ -17,3 +17,7 @@ fun{AddToEnv X}
    end
 end
 
+local Envir in
+  {Browse Envi( X:3 Y:4)}
+  % {Browse Envir}
+end

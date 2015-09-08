@@ -31,7 +31,27 @@ end
 
 proc{BindValueToKeyInSAS Key Val}
    case SAS.Key
-   of equivalence(_) then {Dictionary.put SAS Key Val}
+   of equivalence(H) then
+      for Item in {Dictionary.entries SAS} do
+	 if Item.2 == equivalence(H) then
+	    case Val
+	    of literal(X) then {Dictionary.put SAS Item.1 X}
+/*	    [] record|X then
+	       case X of literal(A)|B then
+		  local Var in
+		     Var = {Dictionary.new}
+		     for Tuple in B do
+			{Browse Tuple}
+			{Dictionary.put Var Tuple.1 Tuple.2}
+		     end
+		     {Dictionary.put SAS Item.1 {Dictionary.toRecord A Var}}
+		  end
+	       end*/
+	    else {Dictionary.put SAS Item.1 Val}
+	    end
+	 % else {Browse 'Something went wrong while binding value'# Val}
+	 end
+      end
    else raise alreadyAssigned(Key Val SAS.Key) end
    end
 end
@@ -48,7 +68,11 @@ proc{BindRefToKeyInSAS Key RefKey}
    local Entry in
       Entry = {Dictionary.get SAS Key}
       case Entry
-      of equivalence(_) then {Dictionary.put SAS Key SAS.RefKey}
+      of equivalence(H) then
+	 for Item in {Dictionary.entries SAS} do
+	    if Item.2 == equivalence(H) then {Dictionary.put SAS Item.1 SAS.RefKey}
+	    end
+	 end
       else raise alreadyAssignedException(Key SAS.RefKey Entry) end
       end
    end
@@ -57,6 +81,11 @@ end
 /* Test cases 
 {Browse {AddKeyToSAS}}
 {Browse {AddKeyToSAS}}
-{BindRefToKeyInSAS 1 2}
+{Browse {AddKeyToSAS}}
+{BindRefToKeyInSAS 1 3}
 {Browse {Dictionary.entries SAS}}
-*/
+
+{BindValueToKeyInSAS 1 34}
+
+{Browse {Dictionary.entries SAS}}
+{Browse {Dictionary.toRecord avik SAS}}*/

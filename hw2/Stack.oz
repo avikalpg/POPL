@@ -9,7 +9,7 @@ end
 
 fun {PopAux L}
    case L
-   of X|Y then Y
+   of _|Y then Y
    end
 end
 

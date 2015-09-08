@@ -29,7 +29,7 @@ end
 {Browse {RetrieveFromSAS 1}}
 {Browse {RetrieveFromSAS 10}}*/
 
-proc{BindValueToKeySAS Key Val}
+proc{BindValueToKeyInSAS Key Val}
    case SAS.Key
    of equivalence(_) then {Dictionary.put SAS Key Val}
    else raise alreadyAssigned(Key Val SAS.Key) end

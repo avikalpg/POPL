@@ -38,8 +38,11 @@ proc{Execute SemStack}
 	 [] bind | Ys then
 	    case Ys
 	    of H|T|nil then
-	       {Unify H T @SemStack.env}
-	       
+	       {Unify H T StackElem.env}
+	       /*{Browse semanticStack#SemStack}
+	       {Browse store#{Dictionary.entries SAS}}*/
+	       SemStack := element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
+	       {Execute SemStack}
 	    else {Browse 'idk'}
 	    end
 	 else {Browse 'Not yet handled'}
@@ -50,7 +53,13 @@ proc{Execute SemStack}
 end
 %{Interpret nil}
 %{Interpret [ [nop] [nop] [nop] ] }
-%{Interpret [[localvar ident(x) [nop]]]}
-%{Interpret [[localvar ident(x) [localvar ident(y) [localvar ident(x) [nop]]]] [nop] [localvar ident(x) [nop]]]}
-{Interpret [[localvar ident(x) ] [nop] [localvar ident(y) [nop]]]}
+
+%{Interpret [[localvar ident(x) [nop]]]} % localvar basic test
+%{Interpret [[localvar ident(x) [localvar ident(y) [localvar ident(x) [nop]] [nop] ] [nop] ] [nop] ]} % check for scoping
+%{Interpret [[localvar ident(x) ] [nop] [localvar ident(y) [nop]]]}
+
+%{Interpret [[localvar ident(x) [bind ident(x) literal(avi)] [nop] ]]}
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)]]]]}
+
+/* GUYS!! In this, the value does not spread into all places occupied by equivalence(2). Please rectify!! */
+%{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)] [bind ident(x) 5]] [nop] ] [localvar ident(a) [bind ident(a) 23]]]}

@@ -29,10 +29,14 @@ proc{Execute SemStack}
 	    local Temp in
 	       case Ys
 	       of ident(X)|Y then
-		  {AdjoinAt StackElem.env X {AddKeyToSAS} Temp}
-		  SemStack := element( stmt:Y env:Temp ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
-		  {Execute SemStack}
-	       else {Browse 'localvar not used properly'}
+		  case Y
+		  of nil then {Browse 'localvar not used properly'}
+		  else
+		     {AdjoinAt StackElem.env X {AddKeyToSAS} Temp}
+		     SemStack := element( stmt:Y env:Temp ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
+		     {Execute SemStack}
+		  end
+		  else {Browse 'localvar not used properly'}
 	       end
 	    end
 	 [] bind | Ys then
@@ -56,7 +60,7 @@ end
 
 %{Interpret [[localvar ident(x) [nop]]]} % localvar basic test
 %{Interpret [[localvar ident(x) [localvar ident(y) [localvar ident(x) [nop]] [nop] ] [nop] ] [nop] ]} % check for scoping
-%{Interpret [[localvar ident(x) ] [nop] [localvar ident(y) [nop]]]}
+{Interpret [[localvar ident(x) ] [nop] [localvar ident(y) [nop]]]}
 
 %{Interpret [[localvar ident(x) [bind ident(x) literal(avi)] [nop] ]]}
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)]]]]}
@@ -73,7 +77,7 @@ end
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind [record literal(a) [[literal(avi) ident(y)] [literal(son) literal(12)]]] ident(x)] [bind ident(y) literal(10)]]]]}
 
 %Our Program fails for this
-%{Interpret [[localvar ident(x) [localvar ident(y) [bind [record literal(a) [[literal(avi) ident(y)] [literal(son) literal(12)]]] ident(x)] [bind ident(x) ident(y)] [bind ident(y) [record literal(a) [[literal(feature1) ident(x1)] [literal(feature2) ident(x2)]]]]]]]}
+%{Interpret [[localvar ident(x) [localvar ident(y) [bind [record literal(a) [[literal(avi) ident(y)] [literal(son) literal(12)]]] ident(x)] [bind ident(x) ident(y)] [bind ident(y) [record literal(a) [[literal(feature1) literal(9)] [literal(feature2) literal(28)]]]]]]]}
 
 %Our program fails here also
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)] [localvar ident(z) [bind ident(z) ident(x)]] [bind literal(32) ident(x)][bind literal(3) ident(x)] ]]]}

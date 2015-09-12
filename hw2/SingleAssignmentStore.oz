@@ -42,9 +42,17 @@ proc{BindValueToKeyInSAS Key Val}
 		     Var = {Dictionary.new}
 		     %{Browse B.1}
 		     for Tuple in B.1 do
+			{Browse Tuple}
 			case Tuple
-			of literal(P)|literal(Q)|nil
-			   then {Dictionary.put Var P Q} 
+			of literal(P)|Q|nil then {Dictionary.put Var P Q}
+			/*[] literal(P)|ident(Q)|nil then
+			   local Temp in
+			      Temp = {Dictionary.condGet SAS Q ~1}
+			      if Temp == ~1 then {Browse 'Error - variable not declared'}
+			      else {Dictionary.put Var P Temp}
+			      end
+			   end*/
+			else {Browse 'Record fields should be literals'} 
 			end
 		     end
 		%     {Browse {Dictionary.entries Var}}

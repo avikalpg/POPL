@@ -30,13 +30,17 @@ proc{Execute SemStack}
 	       case Ys
 	       of ident(X)|Y then
 		  case Y
-		  of nil then {Browse 'localvar not used properly'}
+		  of nil then
+		     {Browse 'localvar has no statements in it'}
+		     raise emptyScopeException(X) end
 		  else
 		     {AdjoinAt StackElem.env X {AddKeyToSAS} Temp}
 		     SemStack := element( stmt:Y env:Temp ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
 		     {Execute SemStack}
 		  end
-		  else {Browse 'localvar not used properly'}
+	       else
+		  {Browse 'localvar not used properly'}
+		  raise variableNameMissingInLocalvarException(Ys) end
 	       end
 	    end
 	 [] bind | Ys then

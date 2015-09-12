@@ -38,36 +38,54 @@ proc{BindValueToKeyInSAS Key Val}
 	    of literal(X) then {Dictionary.put SAS Item.1 X}
 	    [] record|X then
 	       case X of literal(A)|B then
-		  local Var in
-		     Var = {Dictionary.new}
+		  local L in
+		     L = [record A B]
+		     {Dictionary.put SAS Item.1 L}
+		  end
+	       [] A|B then
+		  local L in
+		     L = [record A B]
+		     {Dictionary.put SAS Item.1 L}
+		  end
+	       else
+		  {Browse 'Record has no name'}
+	       end
+	    else {Dictionary.put SAS Item.1 Val}
+	    end
+	 end
+      end
+   else raise alreadyAssigned(Key Val SAS.Key) end      
+   end
+end
+
+		    /*Var = {Dictionary.new}
 		     %{Browse B.1}
 		     for Tuple in B.1 do
 			{Browse Tuple}
 			case Tuple
-			of literal(P)|Q|nil then {Dictionary.put Var P Q}
-			/*[] literal(P)|ident(Q)|nil then
+			of literal(P)|literal(Q)|nil then {Dictionary.put Var P Q}
+			[] literal(P)|Q|nil then {Dictionary.put Var P Q}
 			   local Temp in
 			      Temp = {Dictionary.condGet SAS Q ~1}
 			      if Temp == ~1 then {Browse 'Error - variable not declared'}
 			      else {Dictionary.put Var P Temp}
 			      end
-			   end*/
+			   end
 			else {Browse 'Record fields should be literals'} 
 			end
 		     end
-		%     {Browse {Dictionary.entries Var}}
+		%    {Browse {Dictionary.entries Var}}
 		     		
 		{Dictionary.put SAS Item.1 {Dictionary.toRecord A Var}}
 		  end
 	       end
-	    else {Dictionary.put SAS Item.1 Val}
-	    end
+	   
 	 % else {Browse 'Something went wrong while binding value'# Val}
 	 end
       end
    else raise alreadyAssigned(Key Val SAS.Key) end
    end
-end
+end*/
 
 /* Testing 
 {Browse {RetrieveFromSAS 1}}

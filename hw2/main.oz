@@ -60,7 +60,7 @@ end
 
 %{Interpret [[localvar ident(x) [nop]]]} % localvar basic test
 %{Interpret [[localvar ident(x) [localvar ident(y) [localvar ident(x) [nop]] [nop] ] [nop] ] [nop] ]} % check for scoping
-{Interpret [[localvar ident(x) ] [nop] [localvar ident(y) [nop]]]}
+%{Interpret [[localvar ident(x) ] [nop] [localvar ident(y) [nop]]]}
 
 %{Interpret [[localvar ident(x) [bind ident(x) literal(avi)] [nop] ]]}
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)]]]]}
@@ -81,3 +81,5 @@ end
 
 %Our program fails here also
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)] [localvar ident(z) [bind ident(z) ident(x)]] [bind literal(32) ident(x)][bind literal(3) ident(x)] ]]]}
+
+{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(feature1) literal(3)] [literal(feature2) literal(4)]]]]]]}

@@ -36,17 +36,22 @@ proc{BindValueToKeyInSAS Key Val}
 	 if Item.2 == equivalence(H) then
 	    case Val
 	    of literal(X) then {Dictionary.put SAS Item.1 X}
-/*	    [] record|X then
+	    [] record|X then
 	       case X of literal(A)|B then
 		  local Var in
 		     Var = {Dictionary.new}
-		     for Tuple in B do
-			{Browse Tuple}
-			{Dictionary.put Var Tuple.1 Tuple.2}
+		     %{Browse B.1}
+		     for Tuple in B.1 do
+			case Tuple
+			of literal(P)|literal(Q)|nil
+			   then {Dictionary.put Var P Q} 
+			end
 		     end
-		     {Dictionary.put SAS Item.1 {Dictionary.toRecord A Var}}
+		%     {Browse {Dictionary.entries Var}}
+		     		
+		{Dictionary.put SAS Item.1 {Dictionary.toRecord A Var}}
 		  end
-	       end*/
+	       end
 	    else {Dictionary.put SAS Item.1 Val}
 	    end
 	 % else {Browse 'Something went wrong while binding value'# Val}

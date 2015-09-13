@@ -55,7 +55,7 @@ end
 %% Auxiliary function to BindValueToKeyInSAS
 proc{Assign VarList H Val CurrentList}
    for Item in VarList do
-      {Browse assignitem2#Item.2}
+      %{Browse assignitem2#Item.2}
       case Item.2
       of equivalence(New)|nil then 
 	 if New == H then
@@ -68,7 +68,7 @@ proc{Assign VarList H Val CurrentList}
 	 CurrentList := {Append @CurrentList Item}
       [] record | L | Pairs then
 	 local NewList in
-	    {Browse Pairs}
+	    %{Browse Pairs}
 	    NewList = nil
 	    {Assign Pairs.1 H Val NewList}
 	    CurrentList := {Append @CurrentList NewList}
@@ -91,23 +91,20 @@ end
 proc{BindValueToKeyInSAS Key Val}
    case SAS.Key
    of equivalence(H) then
-      {Browse mainnnnnnnnnnn#{Dictionary.entries SAS}}
+      %{Browse mainnnnnnnnnnn#{Dictionary.entries SAS}}
       for Item in {Dictionary.entries SAS} do
-	 {Browse item2#Item.2}
+	 %{Browse item2#Item.2}
 	 case Item.2
 	 of equivalence(New) then
-	    {Browse 'I reached here'}
 	    if New == H then
-	       {Browse 'here as well'}
 	       {Dictionary.put SAS Item.1 Val} %{ValueToBeAssigned Val}}
 	    else skip
 	    end
-	    {Browse 'Finally here as well'}
 	 [] literal(New) then
 	    skip
 	 [] record | L | Pairs then
 	    local NewList in
-	       {Browse Pairs}
+	       %{Browse Pairs}
 	       NewList = {NewCell nil}
 	       {Assign Pairs.1 H Val NewList}
 	       {Dictionary.put SAS Item.1 record|L|[@NewList]}

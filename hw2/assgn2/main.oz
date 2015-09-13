@@ -80,7 +80,10 @@ end
 %Testing a complex program
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind [record literal(a) [[literal(avi) ident(y)] [literal(son) literal(12)]]] ident(x)] [bind ident(y) literal(10)]]]]}
 
-%Our Program fails for this
+%Our program fails for this
+%{Interpret [[localvar ident(x) [localvar ident(x1) [localvar ident(x2) [bind ident(x) [record literal(a) [[literal(feature1) ident(x1)] [literal(feature2) ident(x2)]]]] [bind ident(x1) literal(10)] [bind ident(x2) [record literal(x2) [[literal(1) ident(x1)]]]]]]]]}
+
+%Our Program works for this
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind [record literal(a) [[literal(avi) literal(2)] [literal(son) literal(12)]]] ident(x)] [bind ident(x) ident(y)] [bind ident(y) [record literal(a) [[literal(feature1) literal(9)] [literal(feature2) literal(28)]]]]]]]}
 
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind [record literal(a) [[literal(a) ident(y)] [literal(b) literal(12)]]] ident(x)] [bind ident(y) 1]]]]} 
@@ -96,3 +99,4 @@ end
 
 %%% NOTE: In the following example, our interpreter behaves exactly like Oz %%%
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) [record ident(y) [[ident(y) literal(first)] [literal(2) ident(y)]]]] [bind ident(y) literal(10)] ]]]}
+

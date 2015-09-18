@@ -18,8 +18,8 @@ end
 
 fun{RetrieveFromSAS Key}
    local Val in
-      Val = {Dictionary.condGet SAS Key ~1}
-      if Val == ~1 then raise missingKeyException(Key) end
+      Val = {Dictionary.condGet SAS Key thisKeyWasNotFoundThrowException}
+      if Val == thisKeyWasNotFoundThrowException then raise missingKeyException(Key) end
       else Val
       end
    end

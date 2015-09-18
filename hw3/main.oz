@@ -51,7 +51,40 @@ proc{Execute SemStack}
 	       {Browse store#{Dictionary.entries SAS}}*/
 	       SemStack := element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
 	       {Execute SemStack}
-	    else {Browse 'idk'}
+	    else
+	       {Browse 'Bind statement not in recognised pattern'}
+	       raise bindStmtException(Ys) end
+	    end
+	 [] conditional | Ys then
+	    case Ys
+	    of ident(X) | S1 | S2 | nil then
+	       local Exp in
+		  Exp = {RetrieveFromSAS StackElem.env.X}
+		  case Exp
+		  of equivalence(_) then raise unboundExpressionInConditional(X) end
+		  [] true then
+		     SemStack := element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+		     {Execute SemStack}
+		  [] false then
+		     SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+		     {Execute SemStack}
+		  [] nil then
+		     {Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
+		     SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+		     {Execute SemStack}		     
+		  [] literal(0) then
+		     {Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
+		     SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+		     {Execute SemStack}		     
+		  else
+		     {Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
+		     SemStack := element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+		     {Execute SemStack}		     
+		  end
+	       end
+	    else
+	       {Browse 'Conditional statement not written in recognised manner'}
+	       raise conditionalStmtException(Ys) end
 	    end
 	 else {Browse 'Not yet handled'}
 	 end
@@ -100,3 +133,10 @@ end
 %%% NOTE: In the following example, our interpreter behaves exactly like Oz %%%
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) [record ident(y) [[ident(y) literal(first)] [literal(2) ident(y)]]]] [bind ident(y) literal(10)] ]]]}
 
+%Testing for conditional statement
+
+%{Interpret [[localvar ident(x) [conditional ident(x) [[nop]] [[nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) true] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) false] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) literal(0)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) literal(1)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}

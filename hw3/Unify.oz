@@ -63,7 +63,7 @@ in
       if {List.member [Exp1 Exp2] UnificationsSoFar}
       then skip
       else
-	 Unifications = {List.append [Exp1 Exp2] UnificationsSoFar}
+	 Unifications = {List.append [[Exp1 Exp2]] UnificationsSoFar}
 	 case Exp1
 	 of equivalence(X) then
 	    case Exp2

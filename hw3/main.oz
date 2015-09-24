@@ -86,6 +86,29 @@ proc{Execute SemStack}
 	       {Browse 'Conditional statement not written in recognised manner'}
 	       raise conditionalStmtException(Ys) end
 	    end
+
+	 [] match | Ys then
+	    case Ys
+	    of ident(X) | P1 | S1 | S2 | nil then
+	       {Browse X}
+	       local Exp in
+		  Exp = {RetrieveFromSAS StackElem.env.X}
+		  {Browse Exp}
+		  /*case Exp
+		  of record | L | Pairs then
+		     %{Browse L}
+		     case P1
+		     of record | L1 | Pairs1
+		     then skip
+		     else
+			skip
+		     end
+		  else
+		     {Browse 'X is not a record.'}
+		     raise patternMatchingException(X) end
+		  end*/
+	       end
+	    end
 	 else {Browse 'Not yet handled'}
 	 end
       else {Browse 'Something went wrong'}
@@ -140,3 +163,5 @@ end
 %{Interpret [[localvar ident(x) [bind ident(x) false] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
 %{Interpret [[localvar ident(x) [bind ident(x) literal(0)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
 %{Interpret [[localvar ident(x) [bind ident(x) literal(1)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
+
+{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(feature1) literal(3)] [literal(feature2) literal(4)]]]]][match ident(x) p1 s1 s2]]}

@@ -1,7 +1,7 @@
 \insert 'Unify.oz'
 \insert 'Stack.oz'
 
-declare Interpret Execute
+declare Interpret Execute 
 
 proc{Interpret Input}
    local SemStack in
@@ -88,34 +88,58 @@ proc{Execute SemStack}
 	    end
 
 	 [] match | Ys then
-	    {Browse Ys}
+	    %{Browse Ys}
 	    case Ys
-	    of ident(X) | P1 | S1 | S2 | nil then
-	       {Browse X}
-	      local Exp in
-		  Exp = {RetrieveFromSAS StackElem.env.X}
-		  {Browse Exp}
-		  case Exp
-		  of record | L | Pairs then
-		     {Browse L}
-		     case P1
-		     of record | L1 | Pairs1
-		     then skip
-		     else
-			skip
+	    of ident(X) | P | S1 | S2 | nil then
+	       try
+		 % local Exp in
+		  %   Exp = {RetrieveFromSAS StackElem.env.X}
+		  case P
+		  of record | L1 | Pairs1
+		  then
+		     
+		     local Temp L in
+			L = {NewCell nil}
+			%Temp := StackElem.env
+			for Tuple in Pairs1 do
+			   {Browse 'Reached here'}
+			   %{Browse 'Here'#Tuple.2.1}
+			   case Tuple.2.1
+			   of ident(Y)
+			   then
+			      {Browse 'Here'#@L}
+			      L := Y#{AddKeyToSAS}|@L
+			      %{AdjoinAt StackElem.env Y {AddKeyToSAS} Temp}
+				 %StackElem.env := Temp
+			   else
+			      skip
+			   end
+			end
+			{Browse @L}
+			{AdjoinList StackElem.env @L Temp} 
+			{Unify ident(X) P Temp}
+			SemStack := element( stmt:S1 env:Temp ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
+			{Execute SemStack}
 		     end
-		  else
-		     {Browse 'X is not a record.'}
-		     raise patternMatchingException(X) end
+		  else 
+		     {Unify ident(X) P StackElem.env}
+		     {Browse S1}
+		     SemStack := element( stmt:S1 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+		     {Execute SemStack}  
 		  end
+	       catch A then
+		  {Browse A}
+		  SemStack := element( stmt:S2 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+		  {Execute SemStack}
 	       end
 	    end
-	 else {Browse 'Not yet handled'}
+	 else {Browse 'Not yet handled'#StackElem.stmt}
 	 end
       else {Browse 'Something went wrong'}
       end
    end
 end
+
 %{Interpret nil}
 %{Interpret [ [nop] [nop] [nop] ] }
 
@@ -165,4 +189,10 @@ end
 %{Interpret [[localvar ident(x) [bind ident(x) literal(0)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
 %{Interpret [[localvar ident(x) [bind ident(x) literal(1)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
 
-{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(feature1) literal(3)] [literal(feature2) literal(4)]]]][match ident(x) p1 s1 s2]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) literal(3)][match ident(x) literal(3) [[nop]] [[nop] [nop]]]]]}
+
+%{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]][bind ident(x) ident(y)][match ident(x) 3 [[nop]] [[nop] [nop]]]]]]}
+
+%{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) literal(fist)] [literal(2) literal(second)]]] [[nop]] [[nop] [nop]]]]]}
+
+{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) ident(h)] [literal(2) literal(second)]]] [[nop]] [[nop] [nop]]]]]}

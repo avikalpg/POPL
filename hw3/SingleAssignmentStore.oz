@@ -106,7 +106,7 @@ proc{BindValueToKeyInSAS Key Val}
 	    local NewList in
 	       %{Browse Pairs}
 	       NewList = {NewCell nil}
-	       {Assign Pairs.1 H Val NewList}
+	       {Assign Pairs H Val NewList}
 	       {Dictionary.put SAS Item.1 record|L|[@NewList]}
 	    end
 	 else skip

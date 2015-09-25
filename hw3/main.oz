@@ -98,27 +98,27 @@ proc{Execute SemStack}
 		  of record | L1 | Pairs1
 		  then
 		     
-		     local Temp L in
+		     local L in
 			L = {NewCell nil}
-			%Temp := StackElem.env
-			for Tuple in Pairs1 do
-			   {Browse 'Reached here'}
+			L := StackElem.env
+			
+			for Tuple in Pairs1.1 do
+			  % {Browse 'Reached here'}
 			   %{Browse 'Here'#Tuple.2.1}
 			   case Tuple.2.1
 			   of ident(Y)
 			   then
-			      {Browse 'Here'#@L}
-			      L := Y#{AddKeyToSAS}|@L
-			      %{AdjoinAt StackElem.env Y {AddKeyToSAS} Temp}
-				 %StackElem.env := Temp
+			      /*{Browse 'Here'#@L}
+			      L := {Append @L Y#{AddKeyToSAS}}*/
+			      L := {AdjoinAt @L Y {AddKeyToSAS}}
 			   else
 			      skip
 			   end
 			end
-			{Browse @L}
-			{AdjoinList StackElem.env @L Temp} 
-			{Unify ident(X) P Temp}
-			SemStack := element( stmt:S1 env:Temp ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
+			%{Browse @L}
+			%{Browse 'Env'#StackElem.env}
+			{Unify ident(X) P @L}
+			SemStack := element( stmt:S1 env:@L ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
 			{Execute SemStack}
 		     end
 		  else 
@@ -189,10 +189,18 @@ end
 %{Interpret [[localvar ident(x) [bind ident(x) literal(0)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
 %{Interpret [[localvar ident(x) [bind ident(x) literal(1)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
 
+
+%Testing for case statements
 %{Interpret [[localvar ident(x) [bind ident(x) literal(3)][match ident(x) literal(3) [[nop]] [[nop] [nop]]]]]}
 
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]][bind ident(x) ident(y)][match ident(x) 3 [[nop]] [[nop] [nop]]]]]]}
 
 %{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) literal(fist)] [literal(2) literal(second)]]] [[nop]] [[nop] [nop]]]]]}
 
-{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) ident(h)] [literal(2) literal(second)]]] [[nop]] [[nop] [nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) ident(h)]]] [[nop]] [[nop] [nop]]]]]}
+
+%{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) ident(t)] [literal(2) ident(h)]]] [[nop]] [[nop] [nop]]]]]}
+
+%{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) ident(h)] [literal(2) literal(first)]]] [[nop]] [[nop] [nop]]]]]}
+
+%{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(2) literal(second)] [literal(1) ident(h)]]] [[nop]] [[nop] [nop]]]]]}

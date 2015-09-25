@@ -29,7 +29,8 @@ end
 {Browse {RetrieveFromSAS 1}}
 {Browse {RetrieveFromSAS 10}}*/
 
-%% Auxiliary function to Assign
+
+/*%% Auxiliary function to Assign
 fun{ValueToBeAssigned Val}
    case Val
    of literal(X) then literal(X)
@@ -41,13 +42,22 @@ fun{ValueToBeAssigned Val}
 	 end
       [] A|B then
 	 local L in
-	    L = [record A B]
+	      L = [record A B]
 	    L
 	 end
       else
 	 {Browse 'Record has no name'}
 	 raise namelessRecordException(Val) end
       end
+   else Val
+   end
+end*/
+INCOMPLETE
+% Changing the definition of ValueToBeAssigned
+fun{ValueToBeAssigned Val Env}
+   case Val
+   of pro | Args | Stmt then
+      {FreeVars Stmt Args} %this should return a list of free variables
    else Val
    end
 end
@@ -57,13 +67,13 @@ proc{Assign VarList H Val CurrentList}
    for Item in VarList do
       %{Browse assignitem2#Item.2}
       case Item.2
-      of equivalence(New)|nil then 
-	 if New == H then
+      of equivalence(!H)|nil then 
+%	 if New == H then
 	       %Item.2.1 = Val %{ValueToBeAssigned Val}}
 	    CurrentList := {Append @CurrentList [Item.1 Val]}
-	 else
-	    CurrentList := {Append @CurrentList Item}
-	 end
+%	 else
+%	    CurrentList := {Append @CurrentList Item}
+%	 end
       [] literal(New)|nil then
 	 CurrentList := {Append @CurrentList Item}
       [] record | L | Pairs then
@@ -97,7 +107,7 @@ proc{BindValueToKeyInSAS Key Val}
 	 case Item.2
 	 of equivalence(New) then
 	    if New == H then
-	       {Dictionary.put SAS Item.1 Val} %{ValueToBeAssigned Val}}
+	       {Dictionary.put SAS Item.1 {ValueToBeAssigned Val}}
 	    else skip
 	    end
 	 [] literal(New) then
@@ -106,7 +116,7 @@ proc{BindValueToKeyInSAS Key Val}
 	    local NewList in
 	       %{Browse Pairs}
 	       NewList = {NewCell nil}
-	       {Assign Pairs.1 H Val NewList}
+	       {Assign Pairs H {ValueToBeAssigned Val} NewList}
 	       {Dictionary.put SAS Item.1 record|L|[@NewList]}
 	    end
 	 else skip

@@ -97,7 +97,6 @@ proc{Execute SemStack}
 		  case P
 		  of record | L1 | Pairs1
 		  then
-		     
 		     local L in
 			L = {NewCell nil}
 			L := StackElem.env
@@ -189,7 +188,6 @@ end
 %{Interpret [[localvar ident(x) [bind ident(x) literal(0)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
 %{Interpret [[localvar ident(x) [bind ident(x) literal(1)] [conditional ident(x) [[localvar ident(y) [nop]]] [[nop] [nop]]]]]}
 
-
 %Testing for case statements
 %{Interpret [[localvar ident(x) [bind ident(x) literal(3)][match ident(x) literal(3) [[nop]] [[nop] [nop]]]]]}
 
@@ -203,4 +201,11 @@ end
 
 %{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) ident(h)] [literal(2) literal(first)]]] [[nop]] [[nop] [nop]]]]]}
 
-%{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(2) literal(second)] [literal(1) ident(h)]]] [[nop]] [[nop] [nop]]]]]}
+{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(2) literal(second)] [literal(1) ident(h)]]] [[localvar ident(z) [bind ident(z) ident(h)]]] [[nop] [nop]]]]]}
+
+% Testing for proc
+
+%{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [[bind ident(x1) ident(x)] [nop]]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [bind ident(x1) ident(x)] [nop]]]]]}
+%{Interpret  [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)]] [bind [pro [ident(x1)] [conditional ident(x1) [[nop]] [[localvar ident(y) [bind ident(y) literal(12)]]]]] ident(x)]]]}

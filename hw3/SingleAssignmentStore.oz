@@ -1,4 +1,4 @@
-declare SAS BindValueToKeyInSAS AddKeyToSAS StoreCounter RetrieveFromSAS BindRefToKeyInSAS
+declare SAS BindValueToKeyInSAS AddKeyToSAS StoreCounter RetrieveFromSAS BindRefToKeyInSAS TupleForRecord FreeVars
 
 SAS = {Dictionary.new}
 StoreCounter = {NewCell 0}
@@ -52,13 +52,69 @@ fun{ValueToBeAssigned Val}
    else Val
    end
 end*/
-INCOMPLETE
+
+% returns a list with unique elements
+fun{Uniq Xs}
+   case Xs
+   of nil then nil
+   [] H|T then H|{Filter T fun{$ X} X \= H end}
+   else 'ERROR: Uniq: Input is not a proper List'
+   end
+end
+
+% Auxiliary function for bind statements in FreeVars function
+fun{FreeVarsBindAux Exps}
+   case Exps
+   of pro|Args|S then {FreeVars S Args} % code changed for proc
+   [] H|T then  
+      {Uniq {Append {FreeVarsBindAux H} {FreeVarsBindAux T}}}
+   [] ident(X) then [Exps]
+   else nil end
+end
+
+% This is to find out the free variables in a statement
+fun{FreeVars Stmt Args}
+   local Final SemiFinal Dummy in
+      {Browse statementsLeft#Stmt}
+      {Browse freevars#Args}
+      case Stmt
+      of nil then SemiFinal = nil
+      [] [nop] then SemiFinal = nil
+      [] localvar|ident(X)|S then
+	 SemiFinal = {FreeVars S {Uniq {Append Args [ident(X)]}}}
+      [] bind|Exps then
+	 SemiFinal = {FreeVarsBindAux Exps}
+      [] conditional | X | S1 | S2 | nil then
+	 SemiFinal = {Uniq {Append {Append {FreeVars S1 Args} {FreeVars S2 Args}} {FreeVarsBindAux X}}}
+      [] match | X | P | S1 | S2 | nil then
+	 SemiFinal = {Uniq {Append {Append {FreeVars S1 {Uniq {Append Args {FreeVarsBindAux P}}}} {FreeVars S2 Args}} {FreeVarsBindAux X}}}
+      [] apply | _ then
+	 {Browse 'FREEVARS: APPLY: Not Yet Handled'}
+      [] S1|S2 then
+	 SemiFinal = {Uniq {Append {FreeVars S1 Args} {FreeVars S2 Args}}}
+      else
+	 {Browse 'PROC: statements have unrecognised form'#Stmt}
+	 SemiFinal = nil
+      end
+      {List.partition SemiFinal fun{$ X} {List.member X Args} end Dummy Final}
+      Final
+   end
+end
 % Changing the definition of ValueToBeAssigned
 fun{ValueToBeAssigned Val Env}
-   case Val
-   of pro | Args | Stmt then
-      {FreeVars Stmt Args} %this should return a list of free variables
-   else Val
+   fun{TupleForRecord Element}
+      case Element
+      of ident(X) then X#Env.X
+      else 'ERROR: TupleForRecord '#Element
+      end
+   end
+   local ListVersion in
+      case Val
+      of pro | Args | Stmt then
+	 {List.map {FreeVars Stmt Args} TupleForRecord ListVersion} %this should return a list of free variables
+	 pro(code:Val closure:{AdjoinList env() ListVersion})
+      else Val
+      end
    end
 end
 
@@ -98,31 +154,34 @@ proc{BindValueToKeyInSAS Key Val}
 end
 *****************************/
 
-proc{BindValueToKeyInSAS Key Val}
-   case SAS.Key
-   of equivalence(H) then
+proc{BindValueToKeyInSAS Key Val Env}
+   local FinalVal in
+      FinalVal = {ValueToBeAssigned Val Env}
+      case SAS.Key
+      of equivalence(H) then
       %{Browse mainnnnnnnnnnn#{Dictionary.entries SAS}}
-      for Item in {Dictionary.entries SAS} do
+	 for Item in {Dictionary.entries SAS} do
 	 %{Browse item2#Item.2}
-	 case Item.2
-	 of equivalence(New) then
-	    if New == H then
-	       {Dictionary.put SAS Item.1 {ValueToBeAssigned Val}}
+	    case Item.2
+	    of equivalence(New) then
+	       if New == H then
+		  {Dictionary.put SAS Item.1 FinalVal}
+	       else skip
+	       end
+	    [] literal(New) then
+	       skip
+	    [] record | L | Pairs then
+	       local NewList in
+	       %{Browse Pairs}
+		  NewList = {NewCell nil}
+		  {Assign Pairs H FinalVal NewList}
+		  {Dictionary.put SAS Item.1 record|L|[@NewList]}
+	       end
 	    else skip
 	    end
-	 [] literal(New) then
-	    skip
-	 [] record | L | Pairs then
-	    local NewList in
-	       %{Browse Pairs}
-	       NewList = {NewCell nil}
-	       {Assign Pairs H {ValueToBeAssigned Val} NewList}
-	       {Dictionary.put SAS Item.1 record|L|[@NewList]}
-	    end
-	 else skip
 	 end
+      else raise alreadyAssigned(Key Val SAS.Key) end      
       end
-   else raise alreadyAssigned(Key Val SAS.Key) end      
    end
 end
 

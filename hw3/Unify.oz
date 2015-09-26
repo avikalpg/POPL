@@ -31,7 +31,8 @@ in
    %=================
    fun {SubstituteIdentifiers Exp Env}
       case Exp
-      of H|T then  
+      of pro|_ then Exp % code changed for proc
+      [] H|T then  
 	 {SubstituteIdentifiers H Env}|{SubstituteIdentifiers T Env}
       [] ident(X) then {RetrieveFromSAS Env.X}
       else Exp end
@@ -68,7 +69,7 @@ in
 	 of equivalence(X) then
 	    case Exp2
 	    of equivalence(Y) then {BindRefToKeyInSAS X Y}
-	    else {BindValueToKeyInSAS X Exp2} end
+	    else {BindValueToKeyInSAS X Exp2 Env} end %This is where I've changed the Unify code for proc
 	 [] literal(X) then
 	    case Exp2
 	    of equivalence(_) then
@@ -94,6 +95,15 @@ in
 		_}
 	    else raise incompatibleTypes(Exp1 Exp2) end
 	    end %
+	 [] pro | Args| Stmt then % Added this part as well
+	    case Exp2
+	    of equivalence(_) then
+	       {UnifyRecursive Exp2 Exp1 Unifications}
+	    [] pro|Arg|Stmts then
+	       %% This is where we have to write the proc equivalence code
+	       raise incompatibleTypes(Exp1 Exp2) end
+	    else raise incompatibleTypes(Exp1 Exp2) end
+	    end
 	 else
 	    raise incompatibleTypes(Exp1 Exp2) end
 	 end

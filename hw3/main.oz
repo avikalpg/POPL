@@ -168,4 +168,7 @@ end
 
 % Testing for proc
 
-%{Interpret [[localvar indent(x) [bind ident(x) [proc [ident(x1) ident(x2)] [nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [[bind ident(x1) ident(x)] [nop]]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [bind ident(x1) ident(x)] [nop]]]]]}
+%{Interpret  [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)]] [bind [pro [ident(x1)] [conditional ident(x1) [[nop]] [[localvar ident(y) [bind ident(y) literal(12)]]]]] ident(x)]]]}

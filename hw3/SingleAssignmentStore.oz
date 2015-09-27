@@ -102,16 +102,16 @@ fun{FreeVars Stmt Args}
 end
 % Changing the definition of ValueToBeAssigned
 fun{ValueToBeAssigned Val Env}
-   fun{TupleForRecord Element}
+   /*fun{TupleForRecord Element}
       case Element
       of ident(X) then X#Env.X
       else 'ERROR: TupleForRecord '#Element
       end
-   end
+   end*/
    local ListVersion in
       case Val
       of pro | Args | Stmt then
-	 {List.map {FreeVars Stmt Args} TupleForRecord ListVersion} %this should return a list of free variables
+	 {List.map {FreeVars Stmt Args} fun{$ Element} case Element of ident(X) then X#Env.X else 'ERROR' end end  ListVersion} %this should return a list of free variables
 	 pro(code:Val closure:{AdjoinList env() ListVersion})
       else Val
       end

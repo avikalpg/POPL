@@ -88,57 +88,56 @@ proc{Execute SemStack}
 	    end
 
 	 [] match | Ys then
-	    %{Browse Ys}
 	    case Ys
 	    of ident(X) | P | S1 | S2 | nil then
-	       try
-		 % local Exp in
-		  %   Exp = {RetrieveFromSAS StackElem.env.X}
-		  case P
-		  of record | L1 | Pairs1
-		  then
-		     local L in
-			L = {NewCell nil}
-			L := StackElem.env
-			
-			for Tuple in Pairs1.1 do
-			  % {Browse 'Reached here'}
-			   %{Browse 'Here'#Tuple.2.1}
-			   case Tuple.2.1
-			   of ident(Y)
-			   then
-			      /*{Browse 'Here'#@L}
-			      L := {Append @L Y#{AddKeyToSAS}}*/
-			      L := {AdjoinAt @L Y {AddKeyToSAS}}
-			   else
-			      skip
+	       local Exp in
+		  Exp = {RetrieveFromSAS StackElem.env.X}
+		  case Exp
+		  of record | L | Pairs then
+		     case P
+		     of record | L1 | Pairs1 then
+			try 
+			   local L in
+			      L = {NewCell nil}
+			      L := StackElem.env
+			      for Tuple in Pairs1.1 do
+				 case Tuple.2.1
+				 of ident(Y)
+				 then
+				    L := {AdjoinAt @L Y {AddKeyToSAS}}
+				 else
+				    skip
+				 end
+			      end
+			      {Unify ident(X) P @L}
+			      SemStack := element( stmt:S1 env:@L ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
+			      {Execute SemStack}
 			   end
+			catch A then
+			   {Browse A}
+			   SemStack := element( stmt:S2 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+			   {Execute SemStack}
 			end
-			%{Browse @L}
-			%{Browse 'Env'#StackElem.env}
-			{Unify ident(X) P @L}
-			SemStack := element( stmt:S1 env:@L ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
+		     else
+			SemStack := element( stmt:S2 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
 			{Execute SemStack}
 		     end
-		  else 
-		     {Unify ident(X) P StackElem.env}
-		     {Browse S1}
-		     SemStack := element( stmt:S1 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-		     {Execute SemStack}  
+		  else
+		     {Browse 'X is not a record'#X}
+		     raise caseHandlingException(X) end
 		  end
-	       catch A then
-		  {Browse A}
-		  SemStack := element( stmt:S2 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-		  {Execute SemStack}
 	       end
-	    end
+	    else
+	       {Browse 'Case statements not handled properly.'}
+	       raise caseStmtException(Ys) end
+	       end
 	 else {Browse 'Not yet handled'#StackElem.stmt}
 	 end
       else {Browse 'Something went wrong'}
       end
    end
 end
-
+      
 %{Interpret nil}
 %{Interpret [ [nop] [nop] [nop] ] }
 
@@ -201,7 +200,7 @@ end
 
 %{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(1) ident(h)] [literal(2) literal(first)]]] [[nop]] [[nop] [nop]]]]]}
 
-{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(2) literal(second)] [literal(1) ident(h)]]] [[localvar ident(z) [bind ident(z) ident(h)]]] [[nop] [nop]]]]]}
+%{Interpret [[localvar ident(x) [bind ident(x) [record literal(a) [[literal(1) literal(first)] [literal(2) literal(second)]]]] [match ident(x) [record literal(a) [[literal(2) literal(second)] [literal(1) ident(h)]]] [[localvar ident(z) [bind ident(z) ident(h)]]] [[nop] [nop]]]]]}
 
 % Testing for proc
 

@@ -1,7 +1,7 @@
 \insert 'Unify.oz'
 \insert 'Stack.oz'
 
-declare Interpret Execute 
+declare Interpret Execute BindArgs
 
 proc{Interpret Input}
    local SemStack in
@@ -9,6 +9,34 @@ proc{Interpret Input}
       {Execute SemStack}
    end
 end
+
+% Auxiliary function for handling apply
+fun{BindArgs Param Args Env}
+   if {List.length Param} \= {List.length Args} then
+      {Browse expected#{List.length Args}}
+      {Browse found#{List.length Param}}
+      raise invalidArguments(Param) end
+   else
+      case Param
+      of nil then nil
+      [] ident(H)|T then
+	 case Args
+	 of ident(F)|B then
+	    local SASIndex in
+	       SASIndex = Env.F
+	       H#SASIndex|{BindArgs T B Env}
+	    end
+	 else
+	    {Browse 'Something went wrong in argument binding'}
+	    raise error(Param Args) end
+	 end
+      else
+	 {Browse 'Something went wrong in argument binding'}
+	 raise error(Param Args) end
+      end
+   end
+end
+
 
 proc{Execute SemStack}
    {Browse @SemStack#{Dictionary.entries SAS} }
@@ -128,9 +156,23 @@ proc{Execute SemStack}
 		  end
 	       end
 	    else
-	       {Browse 'Case statements not handled properly.'}
+	       {Browse 'Case statements not written in a recognized way'}
 	       raise caseStmtException(Ys) end
+	    end
+	 [] apply | ident(F) | Args then
+	    local Func Code Env in
+	       Func = {RetrieveFromSAS StackElem.env.F}
+	       Env = Func.closure
+	       case Func.code
+	       of pro | Param | Commands then
+		  Code = Commands
+		  %{Browse boundArgs#{BindArgs Param Args StackElem.env}}
+		  SemStack := element( stmt:Code env:{AdjoinList Env {BindArgs Param Args StackElem.env}}) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+		  {Execute SemStack}
+	       else
+		  raise notProperProcedure(Func) end
 	       end
+	    end
 	 else {Browse 'Not yet handled'#StackElem.stmt}
 	 end
       else {Browse 'Something went wrong'}
@@ -208,3 +250,8 @@ end
 %{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [[bind ident(x1) ident(x)] [nop]]]]]]}
 %{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [bind ident(x1) ident(x)] [nop]]]]]}
 %{Interpret  [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)]] [bind [pro [ident(x1)] [conditional ident(x1) [[nop]] [[localvar ident(y) [bind ident(y) literal(12)]]]]] ident(x)]]]}
+
+% Testing for apply
+%{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [conditional ident(x2) [[bind ident(x1) literal(10)]] [[bind ident(x1) literal(3)] [nop]]]]] [localvar ident(a) [localvar ident(b) [bind ident(b) true] [apply ident(x) ident(a) ident(b)]]]]]}
+
+%{Interpret [[localvar ident(x) [localvar ident(x1) [bind ident(x) [pro [ident(x2)] [conditional ident(x2) [[bind ident(x1) literal(10)]] [[bind ident(x1) literal(3)] [nop]]]]] [localvar ident(b) [bind ident(b) false] [apply ident(x) ident(b)]]]]]}

@@ -208,3 +208,44 @@ end
 %{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [[bind ident(x1) ident(x)] [nop]]]]]]}
 %{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [bind ident(x1) ident(x)] [nop]]]]]}
 %{Interpret  [[localvar ident(x) [localvar ident(y) [bind ident(x) ident(y)]] [bind [pro [ident(x1)] [conditional ident(x1) [[nop]] [[localvar ident(y) [bind ident(y) literal(12)]]]]] ident(x)]]]}
+
+%% Testing sir's examples
+
+%Record bind
+%{Interpret [localvar ident(foo) [localvar ident(bar) [[bind ident(foo) [record literal(person) [literal(name) ident(bar)]]] [bind ident(bar) [record literal(person) [literal(name) ident(foo)]]] [bind ident(foo) ident(bar)]]]] } 
+
+%{Interpret [localvar ident(foo) [localvar ident(bar) [[bind ident(foo) [record literal(person) [literal(name) ident(bar)]]] [bind ident(bar) [record literal(person) [literal(name) ident(foo)]]]  [bind ident(foo) ident(bar)]]]] }
+
+%{Interpret [localvar ident(foo) [localvar ident(bar) [[bind ident(foo) [record literal(person) [literal(name) ident(foo)]]] [bind ident(bar) [record literal(person) [literal(name) ident(bar)]]] [bind ident(foo) ident(bar)]]]]}
+
+
+%%Conditional
+
+% {Interpret [localvar ident(x) [[localvar ident(y) [[localvar ident(x) [[bind ident(x) ident(y)] [bind ident(y) true] [conditional ident(y)#nop [bind ident(x) true]]]] [bind ident(x) literal(35)]]]]]
+
+% {Interpret [localvar ident(foo) [localvar ident(result) [[bind ident(foo) literal(t)] [conditional ident(foo)#[bind ident(result) literal(t)] [bind ident(result) literal(f)]] %% Check [bind ident(result) literal(t)]]]]
+
+% {Interpret [localvar ident(foo) [localvar ident(result) [[bind ident(foo) literal(f)] [conditional ident(foo)#[bind ident(result) literal(t)] [bind ident(result) literal(f)]] %% Check [bind ident(result) literal(f)]]]]
+
+%%procedure definition and example
+
+%{ Interpret [localvar ident(x) [[bind ident(x) [subr [ident(y) ident(x)] [nop]]]] [apply ident(x) literal(1) literal(2)]]}
+
+%{ Interpret [localvar ident(x) [[bind ident(x) [subr [ident(y) ident(x)] [nop]]] [apply ident(x) literal(1) [record literal(label) [literal(f1) literal(1)]]]]]
+
+%{ Interpret [localvar ident(foo) [localvar ident(bar) [[bind ident(foo) [record literal(person) [literal(name) ident(foo)]]] [bind ident(bar) [record literal(person) [literal(name) ident(bar)]]] [bind ident(foo) ident(bar)]]]]
+
+%{ Interpret [localvar ident(foo) [localvar ident(bar) [localvar ident(quux) [[bind ident(bar) [subr [ident(baz)] [bind [record literal(person) [literal(age) ident(foo)]] ident(baz)]]] [apply ident(bar) ident(quux)] [bind [record literal(person) [literal(age) literal(40)]] ident(quux)] [bind literal(42) ident(foo)]]]]]
+
+%Last example contains comment, copied here
+%{ Interpret [localvar ident(foo) [localvar ident(bar) [localvar ident(quux) [[bind ident(bar) [subr [ident(baz)] [bind [record literal(person) [literal(age) ident(foo)]] ident(baz)]]] [apply ident(bar) ident(quux)] [bind [record literal(person) [literal(age) literal(40)]] ident(quux)] %% We'll check whether foo has been assigned the value by  %% raising an exception here [bind literal(42) ident(foo)]]]]] }
+
+%% Pattern Match
+
+%{ Interpret [localvar ident(x) [[bind ident(x) [record literal(label) [literal(f1) literal(1)] [literal(f2) literal(2)]]] [match ident(x [record literal(label) [literal(f1) literal(1)] [literal(f2) literal(2)]]#[nop] [nop]]]] }
+
+%{ Interpret [localvar ident(foo) [localvar ident(result) [[bind ident(foo) [record literal(bar) [literal(baz) literal(42)] [literal(quux) literal(314)]]] [match ident(foo) [record literal(bar) [literal(baz) ident(fortytwo)] [literal(quux) ident(pitimes100)]]#[bind ident(result) ident(fortytwo)] %% if matched [bind ident(result) literal(314)]] %% This will raise an exception if result is not 42 [bind ident(result) literal(42)] [nop]]]] }
+
+%{ Interpret [localvar ident(foo) [localvar ident(bar) [localvar ident(baz) [[bind ident(foo) ident(bar)] [bind literal(20) ident(bar)] [match ident(foo) literal(21)#[bind ident(baz) literal(t)] [bind ident(baz) literal(f)]] %% Check [bind ident(baz) literal(f)] [nop]]]]] }
+
+%{ Interpret [localvar ident(foo) [localvar ident(bar) [localvar ident(baz) [localvar ident(result) [[bind ident(foo) literal(person)] [bind ident(bar) literal(age)] [bind ident(baz) [record literal(person) [literal(age) literal(25)]]] [match ident(baz) [record ident(foo) [ident(bar) ident(quux)]]#[bind ident(result) ident(quux)] [bind ident(result) literal(f)]] %% Check [bind ident(result) literal(25)]]]]]]

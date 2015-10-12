@@ -48,7 +48,7 @@ proc{Execute SemStack}
 	 {Browse 'Part exec completed'}
 	 SemStack := {PopAux @SemStack}
 	 {Execute SemStack}
-      [] nop|Xs then
+      [] [nop]|Xs then
 	 SemStack := element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
 	 {Execute SemStack}
       [] Top | Xs then

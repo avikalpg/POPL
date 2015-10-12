@@ -48,7 +48,7 @@ proc{Execute SemStack}
 	 {Browse 'Part exec completed'}
 	 SemStack := {PopAux @SemStack}
 	 {Execute SemStack}
-      [] [nop]|Xs then
+      [] nop|Xs then
 	 SemStack := element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
 	 {Execute SemStack}
       [] Top | Xs then
@@ -96,6 +96,14 @@ proc{Execute SemStack}
 		  [] false then
 		     SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
 		     {Execute SemStack}
+		  [] literal(T) then
+		     if (T == t) then
+			SemStack := element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+			{Execute SemStack}
+		     else
+			SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
+			{Execute SemStack}
+		     end
 		  [] nil then
 		     {Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
 		     SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
@@ -255,3 +263,112 @@ end
 %{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [conditional ident(x2) [[bind ident(x1) literal(10)]] [[bind ident(x1) literal(3)] [nop]]]]] [localvar ident(a) [localvar ident(b) [bind ident(b) true] [apply ident(x) ident(a) ident(b)]]]]]}
 
 %{Interpret [[localvar ident(x) [localvar ident(x1) [bind ident(x) [pro [ident(x2)] [conditional ident(x2) [[bind ident(x1) literal(10)]] [[bind ident(x1) literal(3)] [nop]]]]] [localvar ident(b) [bind ident(b) false] [apply ident(x) ident(b)]]]]]}
+
+
+%Examples sent by Sir
+
+%--------------------------
+%Case statements
+%-------------------------
+
+/*{Interpret [[localvar ident(x)
+ [bind ident(x)
+   [record literal(label)
+    [[literal(f1) literal(1)]
+    [literal(f2) literal(2)]]]]
+  [match ident(x)
+   [record literal(label)
+    [[literal(f1) literal(1)]
+     [literal(f2) literal(2)]]] [nop] [nop nop]]]]}*/              
+
+
+/*{Interpret [[localvar ident(foo)
+ [localvar ident(result)
+  [bind ident(foo) [record literal(bar)
+		     [[literal(baz) literal(42)]
+		     [literal(quux) literal(314)]]]]
+   [match ident(foo) [record literal(bar)
+		      [[literal(baz) ident(fortytwo)]
+		      [literal(quux) ident(pitimes100)]]] [[bind ident(result) ident(fortytwo)]]
+    [[bind ident(result) literal(314)]]]
+   [bind ident(result) literal(42)]]]]}*/                                                             
+
+/*{Interpret [[localvar ident(foo)
+  [localvar ident(bar)
+   [localvar ident(baz)
+    [bind ident(foo) ident(bar)]
+     [bind literal(20) ident(bar)]
+     [match ident(foo) literal(21) [bind ident(baz) literal(t)]
+      [bind ident(baz) literal(f)]]
+     %% Check
+     [bind ident(baz) literal(f)]
+    [nop]]]]]}
+*/
+
+/*{Interpret [[localvar ident(foo)
+  [localvar ident(bar)
+   [localvar ident(baz)
+    [localvar ident(result)
+     [bind ident(foo) literal(person)]
+      [bind ident(bar) literal(age)]
+      [bind ident(baz) [record literal(person) [[literal(age) literal(25)]]]]
+      [match ident(baz) [record ident(foo) [[ident(bar) ident(quux)]]] [[bind ident(result) ident(quux)]]
+       [[bind ident(result) literal(f)]]]
+      %% Check
+     [bind ident(result) literal(25)]]]]]]}*/                      
+
+%-----------------------------------------
+%Record Bind
+%----------------------------------------
+
+/*{Interpret [[localvar ident(x)
+ [localvar ident(y)
+  [localvar ident(z)
+   [bind ident(x)
+     [record literal(label)
+      [[literal(f1) ident(y)]
+      [literal(f2) ident(z)]]]]
+    [bind ident(x)
+     [record literal(label) [[literal(f1) 2] [literal(f2) 1]]]]]]]]} */
+
+/*{Interpret [[localvar ident(foo)
+  [localvar ident(bar)
+   [bind ident(foo) [record literal(person) [[literal(name) ident(bar)]]]]
+    [bind ident(bar) [record literal(person) [[literal(name) ident(foo)]]]]
+   [bind ident(foo) ident(bar)]]]]}
+*/
+
+/*{Interpret [[localvar ident(foo)
+  [localvar ident(bar)
+   [bind ident(foo) [record literal(person) [[literal(name) ident(foo)]]]]
+    [bind ident(bar) [record literal(person) [[literal(name) ident(bar)]]]]
+   [bind ident(foo) ident(bar)]]]]} */
+
+%--------------------------------------
+%Conditional
+%------------------------------------
+
+/*{Interpret [[localvar ident(x)
+ [localvar ident(y)
+   [localvar ident(x)
+     [bind ident(x) ident(y)]
+      [bind ident(y) true]
+      [conditional ident(y) [nop]
+       [bind ident(x) true]]]]
+	       [bind ident(x) literal(35)]]]}*/
+
+/*{Interpret [[localvar ident(foo)
+  [localvar ident(result)
+   [bind ident(foo) literal(t)]
+    [conditional ident(foo) [[bind ident(result) literal(t)]]
+     [[bind ident(result) literal(f)]]]
+    %% Check
+   [bind ident(result) literal(t)]]]]}*/
+
+/*{Interpret [[localvar ident(foo)
+  [localvar ident(result)
+   [bind ident(foo) literal(f)]
+    [conditional ident(foo) [[bind ident(result) literal(t)]]
+     [[bind ident(result) literal(f)]]]
+    %% Check
+   [bind ident(result) literal(f)]]]]}*/

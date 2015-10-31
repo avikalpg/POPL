@@ -24,10 +24,10 @@ local ZipWith Length Dummy FoldR_Map BinOp FoldL FoldR Subtract Divide ReverseFo
       A+B
    end
    % Testing the ZipWith function
-   /*{Browse 'Testing 2.1'}
+   {Browse 'Testing 2.1'}
    {Browse {ZipWith Dummy [1 3 5] [2 4 6]}}
    {Browse {ZipWith Dummy nil nil}}
-   {Browse {ZipWith Dummy [1 2] [2 4 5]}}*/
+   {Browse {ZipWith Dummy [1 2] [2 4 5]}}
 
    % Answer 2.2
    /*
@@ -46,8 +46,8 @@ local ZipWith Length Dummy FoldR_Map BinOp FoldL FoldR Subtract Divide ReverseFo
       end
    end
    % Test cases for 2.2
-/*   {Browse 2.2# {FoldR_Map fun{$ A} A*A end [1 2 3]}}
-   {Browse 2.2# {FoldR_Map fun{$ X} X+X end [3 2 4]}}*/
+   {Browse 2.2# {FoldR_Map fun{$ A} A*A end [1 2 3]}}
+   {Browse 2.2# {FoldR_Map fun{$ X} X+X end [3 2 4]}}
 
    % Answer 2.3
    fun{ReverseFoldR BinOp Xs Identity}
@@ -64,7 +64,7 @@ local ZipWith Length Dummy FoldR_Map BinOp FoldL FoldR Subtract Divide ReverseFo
    end
    
    % Test cases
-/*   {Browse 'Testing 2.3'}
+   {Browse 'Testing 2.3'}
    fun{Subtract X Y}
       X - Y
    end
@@ -84,5 +84,5 @@ local ZipWith Length Dummy FoldR_Map BinOp FoldL FoldR Subtract Divide ReverseFo
    {Browse foldL# {FoldL Divide [8. 4. 2.] 1.}} % Expected 1/64
    % Exponent
    {Browse foldR# {FoldR fun{$ X Y} {Pow X Y}+2 end [1 2 3] 3}} % 3
-   {Browse foldL# {FoldL fun{$ X Y} {Pow X Y}+2 end [1 2 3] 3}} % 19,685*/
+   {Browse foldL# {FoldL fun{$ X Y} {Pow X Y}+2 end [1 2 3] 3}} % 19,685
 end

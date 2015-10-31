@@ -110,7 +110,7 @@ fun{TTT L}
    end
 end
 
-/*{Browse {TTT [[s s s] [s s o] [s s x]]}}
+{Browse {TTT [[o o o] [o o o] [o o o]]}}
 {Browse {TTT [[o o o] [s s o] [s s x]]}} % horizontal o
 {Browse {TTT [[s s s] [s s o] [x x x]]}} % horizontal x
 {Browse {TTT [[o o o] [s x o] [x x x]]}} % Look into this again
@@ -119,7 +119,7 @@ end
 {Browse {TTT [[o s x] [o o s] [x s o]]}} % diagonal o
 {Browse {TTT [[o s x] [o x s] [x s o]]}} % diagonal x
 {Browse {TTT [[x o o] [s x o] [s s x]]}}
-{Browse {TTT [[s o s] [x o x] [s x o]]}}*/
+{Browse {TTT [[s o s] [x o x] [s x o]]}}
 
 % 3.3.2
 declare PossibleMoves Check1 Check2 Check3 Check4 Check5 Check6 Check7 Check8 Check9
@@ -182,7 +182,7 @@ fun{PossibleMoves Position Turn}
    {Check1 Position Turn {Check2 Position Turn {Check3 Position Turn {Check4 Position Turn {Check5 Position Turn {Check6 Position Turn {Check7 Position Turn {Check8 Position Turn {Check9 Position Turn nil}}}}}}}}}
 end
 
-/*{Browse '3.3.2'}
-{Browse 1# {PossibleMoves [[o o s] [x o x] [x o s]] o}}
+{Browse '3.3.2'}
+{Browse 1# {PossibleMoves [[o o o] [o o o] [o o o]] o}}
 {Browse 2# {PossibleMoves [[o o s] [x s x] [x o s]] o}}
-{Browse 3# {PossibleMoves [[s s s] [s s s] [s s s]] o}}*/
+{Browse 3# {PossibleMoves [[s s s] [s s s] [s s s]] o}}

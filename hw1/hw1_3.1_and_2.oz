@@ -55,8 +55,8 @@ fun {Taylor3 X N}
    end
 end
 % Testing 3.2.1
-/*{Browse {Taylor3 0.5235 10}}
-{Browse {Taylor3 0.5235 2}}*/
+{Browse {Taylor3 0.5235 10}}
+{Browse {Taylor3 0.5235 1}}
 
 fun {Find Xs F Epsilon}
    case Xs

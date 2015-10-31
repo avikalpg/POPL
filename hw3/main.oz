@@ -14,6 +14,7 @@ end
 fun{BindArgs Param Args Env}
    if {List.length Param} \= {List.length Args} then
       {Browse expected#{List.length Args}}
+
       {Browse found#{List.length Param}}
       raise invalidArguments(Param) end
    else
@@ -227,7 +228,7 @@ end
 %{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(y) literal(10)] [bind ident(x) [record ident(y) [[ident(y) literal(first)] [literal(2) ident(y)]]]]]]]}
 
 %%% NOTE: In the following example, our interpreter behaves exactly like Oz %%%
-%{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) [record ident(y) [[ident(y) literal(first)] [literal(2) ident(y)]]]] [bind ident(y) literal(10)] ]]]}
+/*{Interpret [[localvar ident(x) [localvar ident(y) [bind ident(x) [record ident(y) [[ident(y) literal(first)] [literal(2) ident(y)]]]] [bind ident(y) literal(10)] ]]]}*/
 
 %Testing for conditional statement
 
@@ -262,7 +263,7 @@ end
 % Testing for apply
 %{Interpret [[localvar ident(x) [bind ident(x) [pro [ident(x1) ident(x2)] [conditional ident(x2) [[bind ident(x1) literal(10)]] [[bind ident(x1) literal(3)] [nop]]]]] [localvar ident(a) [localvar ident(b) [bind ident(b) true] [apply ident(x) ident(a) ident(b)]]]]]}
 
-%{Interpret [[localvar ident(x) [localvar ident(x1) [bind ident(x) [pro [ident(x2)] [conditional ident(x2) [[bind ident(x1) literal(10)]] [[bind ident(x1) literal(3)] [nop]]]]] [localvar ident(b) [bind ident(b) false] [apply ident(x) ident(b)]]]]]}
+/*{Interpret [[localvar ident(x) [localvar ident(x1) [bind ident(x) [pro [ident(x2)] [conditional ident(x2) [[bind ident(x1) literal(10)]] [[bind ident(x1) literal(3)] [nop]]]]] [localvar ident(b) [bind ident(b) false] [apply ident(x) ident(b)]]]]]}*/
 
 
 %Examples sent by Sir
@@ -279,7 +280,7 @@ end
   [match ident(x)
    [record literal(label)
     [[literal(f1) literal(1)]
-     [literal(f2) literal(2)]]] [nop] [nop nop]]]]}*/              
+     [literal(f2) literal(2)]]] [nop] [nop nop]]]]}*/          
 
 
 /*{Interpret [[localvar ident(foo)
@@ -291,7 +292,7 @@ end
 		      [[literal(baz) ident(fortytwo)]
 		      [literal(quux) ident(pitimes100)]]] [[bind ident(result) ident(fortytwo)]]
     [[bind ident(result) literal(314)]]]
-   [bind ident(result) literal(42)]]]]}*/                                                             
+   [bind ident(result) literal(42)]]]]}*/                                     
 
 /*{Interpret [[localvar ident(foo)
   [localvar ident(bar)
@@ -302,8 +303,8 @@ end
       [bind ident(baz) literal(f)]]
      %% Check
      [bind ident(baz) literal(f)]
-    [nop]]]]]}
-*/
+    [nop]]]]]}*/
+
 
 /*{Interpret [[localvar ident(foo)
   [localvar ident(bar)
@@ -315,7 +316,7 @@ end
       [match ident(baz) [record ident(foo) [[ident(bar) ident(quux)]]] [[bind ident(result) ident(quux)]]
        [[bind ident(result) literal(f)]]]
       %% Check
-     [bind ident(result) literal(25)]]]]]]}*/                      
+     [bind ident(result) literal(25)]]]]]]}*/
 
 %-----------------------------------------
 %Record Bind
@@ -329,7 +330,7 @@ end
       [[literal(f1) ident(y)]
       [literal(f2) ident(z)]]]]
     [bind ident(x)
-     [record literal(label) [[literal(f1) 2] [literal(f2) 1]]]]]]]]} */
+     [record literal(label) [[literal(f1) literal(2)] [literal(f2) literal(1)]]]]]]]]}*/ 
 
 /*{Interpret [[localvar ident(foo)
   [localvar ident(bar)
@@ -370,5 +371,17 @@ end
    [bind ident(foo) literal(f)]
     [conditional ident(foo) [[bind ident(result) literal(t)]]
      [[bind ident(result) literal(f)]]]
-    %% Check
-   [bind ident(result) literal(f)]]]]}*/
+   [bind ident(result) literal(f)]]]]}
+*/
+
+/*
+Procedure
+*/
+
+/*{Interpret [[localvar ident(x)
+ [bind ident(x)
+   [pro [ident(y) ident(x)] [nop]]]
+ [apply ident(x) literal(1) literal(2)]]]}
+*/
+
+{Interpret [localvar ident(x) [bind ident(x) [record literal(name) [[literal(1) literal(1)] [literal(2) ident(x)]]]]]}

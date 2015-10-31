@@ -384,4 +384,4 @@ Procedure
  [apply ident(x) literal(1) literal(2)]]]}
 */
 
-{Interpret [localvar ident(x) [bind ident(x) [record literal(name) [[literal(1) literal(1)] [literal(2) ident(x)]]]]]}
+%{Interpret [localvar ident(x) [bind ident(x) [record literal(name) [[literal(1) literal(1)] [literal(2) ident(x)]]]]]}

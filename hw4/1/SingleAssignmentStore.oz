@@ -124,12 +124,7 @@ proc{Assign VarList H Val CurrentList}
       %{Browse assignitem2#Item.2}
       case Item.2
       of equivalence(!H)|nil then 
-%	 if New == H then
-	       %Item.2.1 = Val %{ValueToBeAssigned Val}}
-	    CurrentList := {Append @CurrentList [Item.1 Val]}
-%	 else
-%	    CurrentList := {Append @CurrentList Item}
-%	 end
+	 CurrentList := {Append @CurrentList [Item.1 Val]}
       [] literal(New)|nil then
 	 CurrentList := {Append @CurrentList Item}
       [] record | L | Pairs then
@@ -159,20 +154,16 @@ proc{BindValueToKeyInSAS Key Val Env}
       FinalVal = {ValueToBeAssigned Val Env}
       case SAS.Key
       of equivalence(H) then
-      %{Browse mainnnnnnnnnnn#{Dictionary.entries SAS}}
 	 for Item in {Dictionary.entries SAS} do
-	 %{Browse item2#Item.2}
+	    {Browse item2#Item.2}
 	    case Item.2
-	    of equivalence(New) then
-	       if New == H then
+	    of equivalence(!H) then
 		  {Dictionary.put SAS Item.1 FinalVal}
-	       else skip
-	       end
 	    [] literal(New) then
 	       skip
-	    [] record | L | Pairs then
+	    [] record | L | Pairs | nil then
 	       local NewList in
-	       %{Browse Pairs}
+		  %{Browse Pairs}
 		  NewList = {NewCell nil}
 		  {Assign Pairs H FinalVal NewList}
 		  {Dictionary.put SAS Item.1 record|L|[@NewList]}

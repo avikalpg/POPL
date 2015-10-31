@@ -1,3 +1,5 @@
+\insert 'main.oz'
+
 %% Examples slightly adapted from that of S. Tulsiani and A. Singh
 %% These are some of the examples that you can test your code on.
 %% Note that the keywords may be different from those you have
@@ -5,28 +7,40 @@
 %% your code.
 
 %%-------------- Record bind ----------------
-
+/*
 
 %% x = label(f1:y f2:z)
 %% x = label(f1:2 f2:1)
-/*[localvar ident(x)
+[localvar ident(x)
  [localvar ident(y)
   [localvar ident(z)
-   [[bind ident(x)
-     [record literal(label)
-      [literal(f1) ident(y)]
-      [literal(f2) ident(z)]]]
-    [bind ident(x)
-     [record literal(label) [literal(f1) 2] [literal(f2) 1]]]]]]]
+   [
+      [bind ident(x)
+        [record literal(label)
+          [
+            [literal(f1) ident(y)]
+            [literal(f2) ident(z)]
+          ]
+        ]
+      ]
+      [bind ident(x)
+        [record literal(label)
+          [
+            [literal(f1) 2]
+            [literal(f2) 1]
+          ]
+        ]
+      ]
+    ]]]]
 
 
 %% foo = person(name:bar)
 %% bar = person(name:foo)
-%% foo = bar                
+%% foo = bar
 [localvar ident(foo)
  [localvar ident(bar)
-  [[bind ident(foo) [record literal(person) [literal(name) ident(bar)]]]
-   [bind ident(bar) [record literal(person) [literal(name) ident(foo)]]]
+  [[bind ident(foo) [record literal(person) [[literal(name) ident(bar)]]]]
+   [bind ident(bar) [record literal(person) [[literal(name) ident(foo)]]]]
     [bind ident(foo) ident(bar)]]]]
 
 %% foo = person(name:foo)
@@ -34,8 +48,8 @@
 %% foo = bar
 [localvar ident(foo)
   [localvar ident(bar)
-   [[bind ident(foo) [record literal(person) [literal(name) ident(foo)]]]
-    [bind ident(bar) [record literal(person) [literal(name) ident(bar)]]]
+   [[bind ident(foo) [record literal(person) [[literal(name) ident(foo)]]]]
+    [bind ident(bar) [record literal(person) [[literal(name) ident(bar)]]]]
     [bind ident(foo) ident(bar)]]]]
 
 
@@ -79,22 +93,22 @@
     %% Check
     [bind ident(result) literal(f)]]]]
 
-*/
 
+*/
 
 %%---------- Procedure definition and application ---------
 
 
 %% x = proc ($ y x) ; end
 %% x(1,2)
-{Inteerpret [localvar ident(x)
+{Interpret [localvar ident(x)
  [[bind ident(x)
-   [subr [ident(y) ident(x)] [nop]]]]
- [apply ident(x) literal(1) literal(2)]]
-
+   [pro [ident(y) ident(x)] [nop]]]]
+ [apply ident(x) literal(1) literal(2)]]}
+/*
 %% x = proc($ y x) ; end
 %% x(1, label(f1:1)
-/*[localvar ident(x)
+[localvar ident(x)
  [[bind ident(x)
    [subr [ident(y) ident(x)] [nop]]]
   [apply ident(x)
@@ -111,12 +125,34 @@
 [localvar ident(foo)
  [localvar ident(bar)
   [localvar ident(quux)
-   [[bind ident(bar) [subr [ident(baz)]
-		      [bind [record literal(person)
-			     [literal(age) ident(foo)]] ident(baz)]]]
+   [[bind ident(bar) [procedure [ident(baz)]
+              [bind [record literal(person)
+                 [[literal(age) ident(foo)]]] ident(baz)]]]
     [apply ident(bar) ident(quux)]
-    [bind [record literal(person) [literal(age) literal(40)]] ident(quux)]
+    [bind [record literal(person) [[literal(age) literal(40)]]] ident(quux)]
     [bind literal(42) ident(foo)]]]]]
+
+%modified
+[localvar ident(foo)
+ [localvar ident(bar)
+  [localvar ident(quux)
+   [
+    [bind ident(bar) [procedure [ident(baz)]
+                        [
+                            [bind ident(baz)
+                                [record literal(person)
+                                    [
+                                        [literal(age) ident(foo)]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+    ]
+    [apply ident(bar) ident(quux)]
+    [bind [record literal(person) [[literal(age) literal(40)]]] ident(quux)]
+    [bind ident(foo) literal(40) ]]]]]
+
 
 %% bar = proc($ baz) baz=person(age:foo) end
 %% bar(quux)
@@ -148,7 +184,7 @@
    [record literal(label)
     [literal(f1) literal(1)]
     [literal(f2) literal(2)]]#[nop] [nop]]]]
-   
+
 
 %% foo = bar(baz:42 quux:314)
 %% case foo
@@ -159,15 +195,41 @@
 [localvar ident(foo)
  [localvar ident(result)
   [[bind ident(foo) [record literal(bar)
-		     [literal(baz) literal(42)]
-		     [literal(quux) literal(314)]]]
+             [literal(baz) literal(42)]
+             [literal(quux) literal(314)]]]
    [match ident(foo) [record literal(bar)
-		      [literal(baz) ident(fortytwo)]
-		      [literal(quux) ident(pitimes100)]]#[bind ident(result) ident(fortytwo)] %% if matched
+              [literal(baz) ident(fortytwo)]
+              [literal(quux) ident(pitimes100)]]#[bind ident(result) ident(fortytwo)] %% if matched
     [bind ident(result) literal(314)]]
     %% This will raise an exception if result is not 42
    [bind ident(result) literal(42)]
    [nop]]]]
+%modified
+[localvar ident(foo)
+ [localvar ident(result)
+  [
+    [bind ident(foo) [record literal(bar)
+                        [
+                         [literal(baz) literal(42)]
+                         [literal(quux) literal(314)]
+                        ]
+                      ]
+    ]
+    [match ident(foo) [record literal(bar)
+                        [
+                            [literal(baz) ident(fortytwo)]
+                            [literal(quux) ident(pitimes100)]
+                        ]
+                      ]
+            [bind ident(result) ident(fortytwo)] %% if matched
+            [bind ident(result) literal(314)]
+    ]
+    %% This will raise an exception if result is not 42
+   [bind ident(result) literal(43)]
+   [nop]
+   ]
+ ]
+]
 
 %% foo = bar
 %% 20  = bar
@@ -175,13 +237,13 @@
 %% of 21 then baz = t
 %% else baz = f
 %% end
-%% bind = f
+%% baz = f
 [localvar ident(foo)
   [localvar ident(bar)
    [localvar ident(baz)
     [[bind ident(foo) ident(bar)]
-     [bind literal(20) ident(bar)]
-     [match ident(foo) literal(21)#[bind ident(baz) literal(t)]
+     [bind ident(bar) literal(20) ]
+     [match ident(foo) literal(21) [bind ident(baz) literal(t)]
       [bind ident(baz) literal(f)]]
      %% Check
      [bind ident(baz) literal(f)]

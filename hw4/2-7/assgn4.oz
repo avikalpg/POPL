@@ -52,7 +52,8 @@ end
 
 % {Browse Zs}
 
-/*declare MergeStream ScaleStream Hamming % As Bs Cs Ds
+
+declare MergeStream ScaleStream Hamming % As Bs Cs Ds
 
 fun lazy {MergeStream Xs Ys Zs}
    if Xs.1 < Ys.1
@@ -84,6 +85,8 @@ fun lazy {MergeStream Xs Ys Zs}
    end
 end
 
+/*
+
 fun lazy {ScaleStream Xs K}
    case Xs
    of nil then nil
@@ -102,8 +105,10 @@ local As Bs Cs Ds in
    %{Print Hamming}
 end
 */
+
+
 proc {Print1 Ls N}
-   local Aux in
+   local Aux X in
       proc {Aux Ls X}
 	 if X < N
 	 then
@@ -118,7 +123,7 @@ proc {Print1 Ls N}
    end
 end
 
-
+/*
 declare FindMin Filter IsMultiple Hamming
 
 fun {FindMin A B C}
@@ -132,11 +137,12 @@ fun {FindMin A B C}
    end
 end
 
-/*fun {Check X T}
+
+fun {Check X T}
    case T
    of nil then true
    [] T|T1 then
-      if (X mod T == 0} then false
+      if (X mod T == 0) then false
       else {Check X T1}
       end
    end
@@ -190,6 +196,18 @@ fun lazy {GenerateMultiples H}
 end
 
 Hamming = 1 | nil
+
+local As Bs Cs Ds in
+   thread As = {GenerateMultiples 2} end
+   thread Bs = {GenerateMultiples 3} end
+   thread Cs = {GenerateMultiples 5} end
+   thread Hamming = {MergeStream As Bs Cs} end
+end
+
+{Print1 As 11}
+      
+
+/*
 local As Bs Cs A B C X X1 X2 X3 in
    A = 0
    B = 0
@@ -236,3 +254,90 @@ end
 
 
 {Print1 Hamming 11}
+*/
+
+
+/*
+declare Hamming Primes Partition LQuickSort Merge L HSeries Map Times Print1
+
+fun {Times K Xs}
+   case Xs
+   of nil then nil
+   [] H|T then K*H |{Times K T}
+   end
+end
+
+fun{Merge L R}
+   case L
+   of nil then R
+   [] H|T then
+      case R
+      of nil then L
+      [] F|B then
+	 if(H<F) then H|{Merge T R}
+	 else F|{Merge L B}
+	 end
+      end
+   end
+end
+  
+
+proc {Partition Xs Pivot Left Right}
+   case Xs
+   of X|Xr then
+      if X < Pivot
+      then Ln in
+         Left = X | Ln
+         {Partition Xr Pivot Ln Right}
+      else Rn in
+         Right = X | Rn
+         {Partition Xr Pivot Left Rn}
+      end
+   [] nil then Left=nil Right=nil
+   end
+end
+
+fun lazy {LQuickSort Xs}
+   case Xs of X|Xr then Left Right SortedLeft SortedRight in
+      {Partition Xr X Left Right}
+      {Concat {LQuickSort Left} X|{LQuickSort Right}}
+   [] nil then nil
+   end
+end
+
+Primes = {LQuickSort Primes}
+%L = {List.length Primes}
+
+fun {Hamming Primes}
+   case Primes
+   of nil then HSeries
+   [] H|T then
+      thread
+	 HSeries = {Times H {Hamming Primes}}
+      %end
+      %thread
+	 HSeries = {Merge HSeries {Hamming T}}
+      end
+   end
+end
+
+HSeries = 1|{Hamming [2 3 5]}
+
+proc {Print1 Ls N}
+   local Aux in
+      proc {Aux Ls X}
+	 if X < N
+	 then
+	    case Ls
+	    of H|T then
+	       {Browse H}
+	       {Aux T X+1}
+	    end
+	 end
+      end
+      {Aux Ls 0}
+   end
+end
+
+{Print1 HSeries 11}
+*/

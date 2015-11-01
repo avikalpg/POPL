@@ -47,7 +47,7 @@ proc {Print1 Ls N}
    end
 end
 
-fun lazy {GenerateMultiples H}
+fun {GenerateMultiples H}
    local Aux in
       fun {Aux I H}
 	 if H==2 then
@@ -72,13 +72,25 @@ fun lazy {GenerateMultiples H}
    end
 end
 
+fun {Merge As Bs Cs}
+   if {And (As.1 < Bs.1) (As.1 < Cs.1)} then
+      As.1 | {Merge As.2 Bs Cs}
+   else
+      if {And (Bs.1 < Cs.1) (Bs.1 < As.1)} then
+	 Bs.1 | {Merge As Bs.2 Cs}
+      else
+	 Cs.1 | {Merge As Bs Cs.2}
+      end
+   end
+end
+
 %Hamming = 1 | nil
 
 local As Bs Cs Ds in
    thread As = {GenerateMultiples 2} end
    thread Bs = {GenerateMultiples 3} end
    thread Cs = {GenerateMultiples 5} end
-   thread Hamming = 1 | {MergeStream As Bs Cs} end
+   thread Hamming = 1 | {Merge As Bs Cs} end
    %{Print1 As 11}
 end
 {Print1 Hamming 11}

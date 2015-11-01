@@ -55,6 +55,7 @@ end
 
 declare MergeStream ScaleStream Hamming % As Bs Cs Ds
 
+/*
 fun lazy {MergeStream Xs Ys Zs}
    if Xs.1 < Ys.1
    then
@@ -85,8 +86,6 @@ fun lazy {MergeStream Xs Ys Zs}
    end
 end
 
-/*
-
 fun lazy {ScaleStream Xs K}
    case Xs
    of nil then nil
@@ -116,28 +115,31 @@ proc {Print1 Ls N}
 	    of H|T then
 	       {Browse H}
 	       {Aux T X+1}
+	    [] nil then {Browse 'Completed'}
 	    end
+	 else
+	    {Browse 'Done'}
 	 end
       end
       {Aux Ls 0}
    end
 end
 
-/*
+
 declare FindMin Filter IsMultiple Hamming
 
 fun {FindMin A B C}
-   if {And A<B A<C}
-   then A
+   if {And A.1<B.1 A.1<C.1}
+   then A.1
    else
-      if {And B<A B<C}
-      then B
-      else C
+      if {And B.1<A.1 B.1<C.1}
+      then B.1
+      else C.1
       end
    end
 end
 
-
+/*
 fun {Check X T}
    case T
    of nil then true
@@ -170,7 +172,7 @@ fun {Hamming Xs}
 end
 */
 
-fun lazy {GenerateMultiples H}
+fun {GenerateMultiples H}
    local Aux in
       fun {Aux I H}
 	 if H==2 then
@@ -195,8 +197,8 @@ fun lazy {GenerateMultiples H}
    end
 end
 
-Hamming = 1 | nil
-
+Hamming = {NewCell 1|nil}
+/*
 local As Bs Cs Ds in
    thread As = {GenerateMultiples 2} end
    thread Bs = {GenerateMultiples 3} end
@@ -205,42 +207,63 @@ local As Bs Cs Ds in
 end
 
 {Print1 As 11}
-      
+*/      
 
-/*
+
 local As Bs Cs A B C X X1 X2 X3 in
-   A = 0
-   B = 0
-   C = 0
+   A = {NewCell 0}
+   B = {NewCell 0}
+   C = {NewCell 0}
    X = {NewCell 0}
+   X1 = {NewCell 0}
+   X2 = {NewCell 0}
+   X3 = {NewCell 0}
+   As = {NewCell nil}
+   Bs = {NewCell nil}
+   Cs = {NewCell nil}
    
    thread
-      As = {GenerateMultiples 2}
-      A = 1
+      As := {GenerateMultiples 2}
+      A := 1
    end
    thread
-      Bs = {GenerateMultiples 3}
-      B = 1
+      Bs := {GenerateMultiples 3}
+      B := 1
    end
    thread
-      Cs = {GenerateMultiples 5}
-      C = 1
+      Cs := {GenerateMultiples 5}
+      C := 1
    end
    thread
-      if {And A==1 {And B==1 C==1}} then
-	 X1 = {List.last As}
-	 X2 = {List.last Bs}
-	 X3 = {List.last Cs}
-	 X = {FindMin X1 X2 X3}
-	 Hamming = {Append Hamming X}
-	 if X == X1 then A = 0
+      if {And @A==1 {And @B==1 @C==1}} then
+	 
+	 % X1 := {List.last As}
+	 % X2 := {List.last Bs}
+	 % X3 := {List.last Cs}
+	 % {Browse 'Printing'#@X1}
+	 X := {FindMin @As @Bs @Cs}
+	 {Print1 @As 5}
+	 {Print1 @Bs 5}
+	 {Print1 @Cs 5}
+	 {Browse @X}
+	% Hamming := {Append @Hamming @X}
+	 %{Browse @Hamming}
+	 if @X == @As.1 then
+	    As := {List.drop @As 1}
+	    A := 0
+	   % {Browse @As}
 	 else
-	    if X == X2 then B = 0
-	    else C = 0
+	    if @X == @Bs.1 then
+	       Bs := {List.drop @Bs 1}
+	       B := 0
+	    else
+	       Cs := {List.drop @Cs 1}
+	       C := 0
 	    end
 	 end
       end
    end
+  % {Print1 @Hamming 11}
 end
 
 	       
@@ -249,12 +272,7 @@ end
 
 %Hamming = {GenerateMultiples 2}
 
-   
-	 
 
-
-{Print1 Hamming 11}
-*/
 
 
 /*

@@ -6,3 +6,9 @@ Group members
 
 Assumption in Question 6:
 The execution suspends if and only if all of X1,...,Xn are unbound. It gives some result if any one of them is true or false.
+
+Regarding Question 7:
+Suspension is NOT considered in case of function calls
+Reason:
+    In our implementation of function call, we treat all the arguments which are passed as unbound variables, as variables which will carry the return value.
+    That is, variables that will get bound during execution of the procedure

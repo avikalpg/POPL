@@ -473,4 +473,4 @@ end
 */
 %{Interpret [[localvar ident(x) [localvar ident(y) [myThread [bind ident(y) literal(f)]] [myThread [conditional ident(y) [[bind ident(x) literal(10)] nop] [nop [bind literal(5) ident(x)]] ]] ]]]}
 			   
-{Interpret [[localvar ident(x) [myThread [conditional ident(x) [nop] [nop nop [bind ident(x) literal(t)]]]] [myThread [conditional ident(x) [nop nop] [nop nop nop nop]]]]]}
+%{Interpret [[localvar ident(x) [myThread [conditional ident(x) [nop] [nop nop [bind ident(x) literal(t)]]]] [myThread [conditional ident(x) [nop nop] [nop nop nop nop]]]]]}

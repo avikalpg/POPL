@@ -1,12 +1,38 @@
 \insert 'Unify.oz'
 \insert 'Stack.oz'
 
-declare Interpret Execute BindArgs
+declare Interpret Execute BindArgs MulExecute
 
 proc{Interpret Input}
-   local MultiStack in
+   local MultiStack Flag SusProg in
       MultiStack = { NewCell [ [ element(stmt:Input env:env()) ] ] }
+      Flag = {NewCell false}
+      SusProg = {NewCell nil}
+      {MulExecute MultiStack Flag SusProg}
+   end
+end
+
+proc{MulExecute MultiStack Flag SusProg}
+   try
       {Execute MultiStack}
+      Flag := false
+      SusProg := nil
+   catch unboundExpressionInConditional(X) then
+      {Browse 'Caught Exception in Conditional Stmt'}
+/*      if Flag then
+	 if @MultiStack == SusProg then
+	    {Browse 'Only suspended statements left in'#@MultiStack}
+	 else
+	    MultiStack := {Append {PopAux @MultiStack} [@MultiStack.1]}
+	    {MulExecute MultiStack Flag SusProg}
+	 end
+      else
+	 Flag := true
+	 SusProg := @MultiStack*/
+	 MultiStack := {Append {PopAux @MultiStack} [@MultiStack.1]}
+	 {MulExecute MultiStack Flag SusProg}
+	 
+%      end
    end
 end
 
@@ -40,11 +66,12 @@ end
 
 
 proc{Execute MultiStack}
-   %{Browse multistack#@MultiStack }
+   {Browse multistack#@MultiStack }
+   {Browse store#{Dictionary.entries SAS}}
    case @MultiStack
    of nil then {Browse 'Execution completed successfully'}
    [] SemStack|_ then
-      {Browse SemStack#{Dictionary.entries SAS} }
+      % {Browse SemStack#{Dictionary.entries SAS} }
       case SemStack
       of nil then
 	 {Browse 'Execution of stack completed'}
@@ -424,6 +451,26 @@ local X in
       end
    end
 end
+****
+{Interpret [[localvar ident(x) [bind ident(x) literal(2)] [myThread [localvar ident(y) [bind ident(y) literal(1)]]] [myThread [localvar ident(z) [bind ident(z) literal(10)]]]]]}*/
+
+/*
+local X Y in
+   thread
+      if(Y) then
+	 X = 10
+	 {Browse X}
+      else
+	 X = 5
+	 {Browse X}
+      end
+   end
+   thread
+      Y = false
+   end
+   {Browse X}
+end
 */
-{Interpret [[localvar ident(x) [bind ident(x) literal(2)] [myThread [localvar ident(y) [bind ident(y) literal(1)]]] [myThread [localvar ident(z) [bind ident(z) literal(10)]]]]]}
+{Interpret [[localvar ident(x) [localvar ident(y) [myThread [bind ident(y) literal(f)]] [myThread [conditional ident(y) [[bind ident(x) literal(10)] nop] [nop [bind literal(5) ident(x)]] ]] ]]]}
 			   
+%{Interpret [[localvar ident(x) [myThread [conditional ident(x) [nop] [nop nop [bind ident(x) literal(t)]]]] [myThread [conditional ident(x) [nop nop] [nop nop nop nop]]]]]}

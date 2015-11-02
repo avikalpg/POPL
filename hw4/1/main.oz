@@ -339,7 +339,7 @@ end
   [localvar ident(z)
    [bind ident(x)
      [record literal(label)
-      [[literal(f1) ident(y)]
+      [[literal(f1) literal(2)]
       [literal(f2) ident(z)]]]]
     [bind ident(x)
      [record literal(label) [[literal(f1) literal(2)] [literal(f2) literal(1)]]]]]]]]}

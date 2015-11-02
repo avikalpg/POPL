@@ -4,9 +4,9 @@
 declare Interpret Execute BindArgs
 
 proc{Interpret Input}
-   local SemStack in
-      SemStack = { NewCell [ element(stmt:Input env:env()) ] }
-      {Execute SemStack}
+   local MultiStack in
+      MultiStack = { NewCell [ [ element(stmt:Input env:env()) ] ] }
+      {Execute MultiStack}
    end
 end
 
@@ -39,159 +39,171 @@ fun{BindArgs Param Args Env}
 end
 
 
-proc{Execute SemStack}
-   {Browse @SemStack#{Dictionary.entries SAS} }
-   case @SemStack
+proc{Execute MultiStack}
+   %{Browse multistack#@MultiStack }
+   case @MultiStack
    of nil then {Browse 'Execution completed successfully'}
-   [] StackElem|_ then 
-      case StackElem.stmt
+   [] SemStack|_ then
+      {Browse SemStack#{Dictionary.entries SAS} }
+      case SemStack
       of nil then
-	 {Browse 'Part exec completed'}
-	 SemStack := {PopAux @SemStack}
-	 {Execute SemStack}
-      [] nop|Xs then
-	 SemStack := element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-	 {Execute SemStack}
-      [] Top | Xs then
-	 case Top
-	 of localvar | Ys then
-	    local Temp in
-	       case Ys
-	       of ident(X)|Y then
-		  case Y
-		  of nil then
-		     {Browse 'localvar has no statements in it'}
-		     raise emptyScopeException(X) end
+	 {Browse 'Execution of stack completed'}
+	 MultiStack := {PopAux @MultiStack}
+	 {Execute MultiStack}
+      [] StackElem|_ then 
+	 case StackElem.stmt
+	 of nil then
+	    {Browse 'Part exec completed'}
+	    MultiStack := {PopAux SemStack} | {PopAux @MultiStack}
+	    {Execute MultiStack}
+	 [] nop|Xs then
+	    MultiStack := ( element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+	    {Execute MultiStack}
+	 [] [nop]|Xs then
+	    MultiStack := ( element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+	    {Execute MultiStack}
+	 [] Top | Xs then
+	    case Top
+	    of localvar | Ys then
+	       local Temp in
+		  case Ys
+		  of ident(X)|Y then
+		     case Y
+		     of nil then
+			{Browse 'localvar has no statements in it'}
+			raise emptyScopeException(X) end
+		     else
+			{AdjoinAt StackElem.env X {AddKeyToSAS} Temp}
+			MultiStack := ( element( stmt:Y env:Temp ) | element( stmt:Xs env:StackElem.env) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			{Execute MultiStack}
+		     end
 		  else
-		     {AdjoinAt StackElem.env X {AddKeyToSAS} Temp}
-		     SemStack := element( stmt:Y env:Temp ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
-		     {Execute SemStack}
+		     {Browse 'localvar not used properly'}
+		     raise variableNameMissingInLocalvarException(Ys) end
+		  end
+	       end
+	    [] bind | Ys then
+	       case Ys
+	       of H|T|nil then
+		  {Unify H T StackElem.env}
+		  /*{Browse semanticStack#SemStack}
+		  {Browse store#{Dictionary.entries SAS}}*/
+		  MultiStack := ( element( stmt:Xs env:StackElem.env) | {PopAux SemStack} ) | {PopAux @MultiStack}
+		  {Execute MultiStack}
+	       else
+		  {Browse 'Bind statement not in recognised pattern'}
+		  raise bindStmtException(Ys) end
+	       end
+	    [] conditional | Ys then
+	       case Ys
+	       of ident(X) | S1 | S2 | nil then
+		  local Exp in
+		     Exp = {RetrieveFromSAS StackElem.env.X}
+		     case Exp
+		     of equivalence(_) then raise unboundExpressionInConditional(X) end
+		     [] true then
+			MultiStack := ( element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			{Execute MultiStack}
+		     [] false then
+			MultiStack := ( element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			{Execute MultiStack}
+		     [] nil then
+			{Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
+			MultiStack := ( element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			{Execute MultiStack}		     
+		     [] literal(0) then
+			{Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
+			MultiStack := ( element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			{Execute MultiStack}		     
+		     [] literal(t) then
+			MultiStack := ( element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			{Execute MultiStack}
+		     [] literal(f) then
+			MultiStack := ( element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			{Execute MultiStack}
+		     else
+			{Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
+			MultiStack := ( element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			{Execute MultiStack}		     
+		     end
 		  end
 	       else
-		  {Browse 'localvar not used properly'}
-		  raise variableNameMissingInLocalvarException(Ys) end
+		  {Browse 'Conditional statement not written in recognised manner'}
+		  raise conditionalStmtException(Ys) end
 	       end
-	    end
-	 [] bind | Ys then
-	    case Ys
-	    of H|T|nil then
-	       {Unify H T StackElem.env}
-	       /*{Browse semanticStack#SemStack}
-	       {Browse store#{Dictionary.entries SAS}}*/
-	       SemStack := element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
-	       {Execute SemStack}
-	    else
-	       {Browse 'Bind statement not in recognised pattern'}
-	       raise bindStmtException(Ys) end
-	    end
-	 [] conditional | Ys then
-	    case Ys
-	    of ident(X) | S1 | S2 | nil then
-	       local Exp in
-		  Exp = {RetrieveFromSAS StackElem.env.X}
-		  case Exp
-		  of equivalence(_) then raise unboundExpressionInConditional(X) end
-		  [] true then
-		     SemStack := element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-		     {Execute SemStack}
-		  [] false then
-		     SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-		     {Execute SemStack}
-		  [] literal(T) then
-		     if (T == t) then
-			SemStack := element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-			{Execute SemStack}
-		     else
-			SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-			{Execute SemStack}
-		     end
-		  [] nil then
-		     {Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
-		     SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-		     {Execute SemStack}		     
-		  [] literal(0) then
-		     {Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
-		     SemStack := element( stmt:S2 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-		     {Execute SemStack}		     
-		  else
-		     {Browse 'WARNING: the expression value in conditional operator '#X#' is not a boolean'}
-		     SemStack := element( stmt:S1 env:StackElem.env ) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-		     {Execute SemStack}		     
-		  end
-	       end
-	    else
-	       {Browse 'Conditional statement not written in recognised manner'}
-	       raise conditionalStmtException(Ys) end
-	    end
-
-	 [] match | Ys then
-	    case Ys
-	    of ident(X) | P | S1 | S2 | nil then
-	       local Exp in
-		  Exp = {RetrieveFromSAS StackElem.env.X}
-		  case Exp
-		  of record | L | Pairs then
-		     case P
-		     of record | L1 | Pairs1 then
-			try 
-			   local L in
-			      L = {NewCell nil}
-			      L := StackElem.env
-			      for Tuple in Pairs1.1 do
-				 case Tuple.2.1
-				 of ident(Y)
-				 then
-				    L := {AdjoinAt @L Y {AddKeyToSAS}}
-				 else
-				    skip
+	       
+	    [] match | Ys then
+	       case Ys
+	       of ident(X) | P | S1 | S2 | nil then
+		  local Exp in
+		     Exp = {RetrieveFromSAS StackElem.env.X}
+		     case Exp
+		     of record | L | _ then
+			case P
+			of record | L1 | Pairs1 then
+			   try 
+			      local L in
+				 L = {NewCell nil}
+				 L := StackElem.env
+				 for Tuple in Pairs1.1 do
+				    case Tuple.2.1
+				    of ident(Y)
+				    then
+				       L := {AdjoinAt @L Y {AddKeyToSAS}}
+				    else
+				       skip
+				    end
 				 end
+				 {Unify ident(X) P @L}
+				 MultiStack := ( element( stmt:S1 env:@L ) | element( stmt:Xs env:StackElem.env) | {PopAux SemStack} ) | {PopAux @MultiStack}
+				 {Execute MultiStack}
 			      end
-			      {Unify ident(X) P @L}
-			      SemStack := element( stmt:S1 env:@L ) | element( stmt:Xs env:StackElem.env) | {PopAux @SemStack}
-			      {Execute SemStack}
+			   catch A then
+			      {Browse A}
+			      MultiStack := ( element( stmt:S2 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			      {Execute MultiStack}
 			   end
-			catch A then
-			   {Browse A}
-			   SemStack := element( stmt:S2 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-			   {Execute SemStack}
+			else
+			   MultiStack := ( element( stmt:S2 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+			   {Execute MultiStack}
 			end
 		     else
-			SemStack := element( stmt:S2 env:StackElem.env) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-			{Execute SemStack}
+			{Browse 'X is not a record'#X}
+			raise caseHandlingException(X) end
 		     end
+		  end
+	       else
+		  {Browse 'Case statements not written in a recognized way'}
+		  raise caseStmtException(Ys) end
+	       end
+	    [] apply | ident(F) | Args then
+	       local Func Code Env in
+		  Func = {RetrieveFromSAS StackElem.env.F}
+		  Env = Func.closure
+		  case Func.code
+		  of pro | Param | Commands then
+		     Code = Commands
+		  %{Browse boundArgs#{BindArgs Param Args StackElem.env}}
+		     MultiStack := ( element( stmt:Code env:{AdjoinList Env {BindArgs Param Args StackElem.env}}) | element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | {PopAux @MultiStack}
+		     {Execute MultiStack}
 		  else
-		     {Browse 'X is not a record'#X}
-		     raise caseHandlingException(X) end
+		     raise notProperProcedure(Func) end
 		  end
 	       end
-	    else
-	       {Browse 'Case statements not written in a recognized way'}
-	       raise caseStmtException(Ys) end
+	    else {Browse 'Not yet handled'#StackElem.stmt}
 	    end
-	 [] apply | ident(F) | Args then
-	    local Func Code Env in
-	       Func = {RetrieveFromSAS StackElem.env.F}
-	       Env = Func.closure
-	       case Func.code
-	       of pro | Param | Commands then
-		  Code = Commands
-		  %{Browse boundArgs#{BindArgs Param Args StackElem.env}}
-		  SemStack := element( stmt:Code env:{AdjoinList Env {BindArgs Param Args StackElem.env}}) | element( stmt:Xs env:StackElem.env ) | {PopAux @SemStack}
-		  {Execute SemStack}
-	       else
-		  raise notProperProcedure(Func) end
-	       end
-	    end
-	 else {Browse 'Not yet handled'#StackElem.stmt}
+	 else {Browse 'Something went wrong'}
 	 end
-      else {Browse 'Something went wrong'}
+      else {Browse 'Incorrect Structure of SemStack'#SemStack}
       end
+   else {Browse 'Incorrect structure of MultiStack'#@MultiStack}
    end
 end
-      
+   
 %{Interpret nil}
-%{Interpret [ [nop] [nop] [nop] ] }
-
+%{Interpret [ nop nop nop ] }
+%{Interpret [ [nop] [nop] [nop] ] } % this does not work
+   
 %{Interpret [[localvar ident(x) [nop]]]} % localvar basic test
 %{Interpret [[localvar ident(x) [localvar ident(y) [localvar ident(x) [nop]] [nop] ] [nop] ] [nop] ]} % check for scoping
 %{Interpret [[localvar ident(x) ] [nop] [localvar ident(y) [nop]]]}
@@ -280,7 +292,7 @@ end
   [match ident(x)
    [record literal(label)
     [[literal(f1) literal(1)]
-     [literal(f2) literal(2)]]] [nop] [nop nop]]]]}*/          
+     [literal(f2) literal(2)]]] [nop] [nop nop]]]]}*/
 
 
 /*{Interpret [[localvar ident(foo)
@@ -322,7 +334,7 @@ end
 %Record Bind
 %----------------------------------------
 
-/*{Interpret [[localvar ident(x)
+{Interpret [[localvar ident(x)
  [localvar ident(y)
   [localvar ident(z)
    [bind ident(x)
@@ -330,7 +342,7 @@ end
       [[literal(f1) ident(y)]
       [literal(f2) ident(z)]]]]
     [bind ident(x)
-     [record literal(label) [[literal(f1) literal(2)] [literal(f2) literal(1)]]]]]]]]}*/ 
+     [record literal(label) [[literal(f1) literal(2)] [literal(f2) literal(1)]]]]]]]]}
 
 /*{Interpret [[localvar ident(foo)
   [localvar ident(bar)
@@ -378,10 +390,12 @@ end
 Procedure
 */
 
-/*{Interpret [[localvar ident(x)
+/*
+{Interpret [[localvar ident(x)
  [bind ident(x)
    [pro [ident(y) ident(x)] [nop]]]
  [apply ident(x) literal(1) literal(2)]]]}
 */
 
+%%%%%% This does not work because according to sir's problem statement, apply only takes variables as arguments%%%%%%%%%%
 %{Interpret [localvar ident(x) [bind ident(x) [record literal(name) [[literal(1) literal(1)] [literal(2) ident(x)]]]]]}

@@ -75,8 +75,8 @@ end
 % This is to find out the free variables in a statement
 fun{FreeVars Stmt Args}
    local Final SemiFinal Dummy in
-      {Browse statementsLeft#Stmt}
-      {Browse freevars#Args}
+      %{Browse statementsLeft#Stmt}
+      %{Browse freevars#Args}
       case Stmt
       of nil then SemiFinal = nil
       [] [nop] then SemiFinal = nil
@@ -121,7 +121,7 @@ end
 %% Auxiliary function to BindValueToKeyInSAS
 proc{Assign VarList H Val CurrentList}
    for Item in VarList do
-      %{Browse assignitem2#Item.2}
+      %{Browse assignitem2#Item}
       case Item.2
       of equivalence(!H)|nil then 
 	 CurrentList := {Append @CurrentList [Item.1 Val]}

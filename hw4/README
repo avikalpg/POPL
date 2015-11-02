@@ -1,0 +1,8 @@
+CS350A Assignment 2
+Group members
+1. Avikalp Kumar Gupta 12178
+2. Harshvardhan Solanki 12293
+3. Prachi Gupta 12485
+
+Assumption in Question 6:
+The execution suspends if and only if all of X1,...,Xn are unbound. It gives some result if any one of them is true or false.

@@ -19,20 +19,20 @@ proc{MulExecute MultiStack Flag SusProg}
       SusProg := nil
    catch unboundExpressionInConditional(X) then
       {Browse 'Caught Exception in Conditional Stmt'}
-/*      if Flag then
-	 if @MultiStack == SusProg then
+      if @Flag then
+	 if @MultiStack == @SusProg then
 	    {Browse 'Only suspended statements left in'#@MultiStack}
+	    {Browse 'Program terminated'}
 	 else
 	    MultiStack := {Append {PopAux @MultiStack} [@MultiStack.1]}
 	    {MulExecute MultiStack Flag SusProg}
 	 end
       else
 	 Flag := true
-	 SusProg := @MultiStack*/
+	 SusProg := @MultiStack
 	 MultiStack := {Append {PopAux @MultiStack} [@MultiStack.1]}
 	 {MulExecute MultiStack Flag SusProg}
-	 
-%      end
+      end
    end
 end
 
@@ -471,6 +471,6 @@ local X Y in
    {Browse X}
 end
 */
-{Interpret [[localvar ident(x) [localvar ident(y) [myThread [bind ident(y) literal(f)]] [myThread [conditional ident(y) [[bind ident(x) literal(10)] nop] [nop [bind literal(5) ident(x)]] ]] ]]]}
+%{Interpret [[localvar ident(x) [localvar ident(y) [myThread [bind ident(y) literal(f)]] [myThread [conditional ident(y) [[bind ident(x) literal(10)] nop] [nop [bind literal(5) ident(x)]] ]] ]]]}
 			   
-%{Interpret [[localvar ident(x) [myThread [conditional ident(x) [nop] [nop nop [bind ident(x) literal(t)]]]] [myThread [conditional ident(x) [nop nop] [nop nop nop nop]]]]]}
+{Interpret [[localvar ident(x) [myThread [conditional ident(x) [nop] [nop nop [bind ident(x) literal(t)]]]] [myThread [conditional ident(x) [nop nop] [nop nop nop nop]]]]]}

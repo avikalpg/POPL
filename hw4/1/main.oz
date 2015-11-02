@@ -190,6 +190,12 @@ proc{Execute MultiStack}
 		     raise notProperProcedure(Func) end
 		  end
 	       end
+	    [] myThread | Code then
+	       local NewStack in
+		  NewStack = [ element(stmt:Code env:StackElem.env) ]
+		  MultiStack := ( element( stmt:Xs env:StackElem.env ) | {PopAux SemStack} ) | NewStack | {PopAux @MultiStack}
+		  {Execute MultiStack}
+	       end
 	    else {Browse 'Not yet handled'#StackElem.stmt}
 	    end
 	 else {Browse 'Something went wrong'}
@@ -334,7 +340,7 @@ end
 %Record Bind
 %----------------------------------------
 
-{Interpret [[localvar ident(x)
+/*{Interpret [[localvar ident(x)
  [localvar ident(y)
   [localvar ident(z)
    [bind ident(x)
@@ -342,7 +348,7 @@ end
       [[literal(f1) ident(y)]
       [literal(f2) ident(z)]]]]
     [bind ident(x)
-     [record literal(label) [[literal(f1) literal(2)] [literal(f2) literal(1)]]]]]]]]}
+     [record literal(label) [[literal(f1) literal(2)] [literal(f2) literal(1)]]]]]]]]}*/
 
 /*{Interpret [[localvar ident(foo)
   [localvar ident(bar)
@@ -399,3 +405,25 @@ Procedure
 
 %%%%%% This does not work because according to sir's problem statement, apply only takes variables as arguments%%%%%%%%%%
 %{Interpret [localvar ident(x) [bind ident(x) [record literal(name) [[literal(1) literal(1)] [literal(2) ident(x)]]]]]}
+
+/****************************************
+******** Test cases - threads **********
+****************************************/
+
+/*
+local X in
+   X = 2
+   thread
+      local Y in
+	 Y = 1
+      end
+   end
+   thread
+      local Z in
+	 Z = 10
+      end
+   end
+end
+*/
+{Interpret [[localvar ident(x) [bind ident(x) literal(2)] [myThread [localvar ident(y) [bind ident(y) literal(1)]]] [myThread [localvar ident(z) [bind ident(z) literal(10)]]]]]}
+			   

@@ -2,14 +2,20 @@ declare Barrieraux Barrier
 proc {Barrieraux Zs P}
    local Q  in
 	 case Zs
-	 [] H|T then
+	 of H|T then
 	    thread
-	       {H}
+	       {H 4 2}
 	       Q=P
 	    end
 	    {Barrieraux T Q}
-	 of nil then
-	    if P==1 then skip end
+	 [] nil then
+	    if P==1 then
+	       {Browse 'Process Completed'}
+	    else
+	       {Browse 'Something went wrong yet again ;)'}
+	    end
+	 else
+	    {Browse 'Something went wrong'#Zs}
 	 end
     end
 end
@@ -21,21 +27,39 @@ proc{Barrier Zs}
    end
 end
 
-local Barrier Zs Add Multiply Divide in
+local Zs Add Multiply Subtract Dummy Inf01 Inf02 in
 
- proc{Add X Y}
-  {X+Y}
- end
+   Add = proc{$ X Y}
+	    {Browse X+Y}
+	 end
+   
+   Multiply = proc{$ X Y}
+		 {Browse X*Y}
+	      end
+   
+   Subtract = proc{$ X Y}
+	       {Browse X-Y}
+	      end
+   
+   Dummy = proc{$ X Y}
+	      local Newvar in
+		 %Newvar = 1
+		 if Newvar == 1 then {Browse 1}
+		 else skip
+		 end
+	      end
+	   end
 
- proc{Multiply X Y}
-  {X*Y}
- end
-
- proc{Divide X Y}
-  {X/Y}
- end
-
- Zs={Add 4 2}|{Multiply 4 2}|{Divide 4 2}
- {Barrier Zs}
+/*   Inf01 = proc{$ X Y}
+	      {Browse X}
+	      {Inf01 X Y}
+	   end
+   Inf02 = proc{$ X Y}
+	      {Browse Y}
+	      {Inf02 X Y}
+	   end*/
+         
+   Zs=Add|Dummy|Multiply|Subtract|Inf01|Inf02|nil
+   {Barrier Zs}
 end
   

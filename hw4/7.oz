@@ -1,21 +1,41 @@
-declare Barrier
-proc {Barrier Zs P}
+declare Barrieraux Barrier
+proc {Barrieraux Zs P}
    local Q  in
 	 case Zs
-	 [] H|T  then
+	 [] H|T then
 	    thread
 	       {H}
 	       Q=P
 	    end
-	    {Barrier T Q 0}
+	    {Barrieraux T Q}
 	 of nil then
 	    if P==1 then skip end
 	 end
     end
 end
 
-local Barrier Zs
- {Barrier Zs 1}
+proc{Barrier Zs}
+   local P in
+         P=1
+         {Barrieraux Zs P}
+   end
+end
 
-   #test cases
-   
+local Barrier Zs Add Multiply Divide in
+
+ proc{Add X Y}
+  {X+Y}
+ end
+
+ proc{Multiply X Y}
+  {X*Y}
+ end
+
+ proc{Divide X Y}
+  {X/Y}
+ end
+
+ Zs={Add 4 2}|{Multiply 4 2}|{Divide 4 2}
+ {Barrier Zs}
+end
+  

@@ -20,7 +20,7 @@ fun {Average S Xs}
   of X|Xr then
      case Xs
      of Z|Zr then
-	X*Z|{Average Xr Zr}
+       {{IntToFloat{X}}/{IntToFloat{Z}}}|{Average Xr Zr}
      [] nil then nil
      end	 
   [] nil then nil
@@ -45,5 +45,6 @@ local Xs S R X A in
    thread Xs={Sequence 1 10} end
    thread S={Summation R 0}   end
    thread A={Average S Xs} end
+   
 end
 
